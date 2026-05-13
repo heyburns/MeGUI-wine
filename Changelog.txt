@@ -1,0 +1,81 @@
+Changelog version 6666 20260329
+
+- Fixed several issues on svt-av1 encoder side
+- Fixed issue on Progress Window Form
+- Added Demuxers, available through the Tools Menu
+
+Changelog version 6666 20260329
+
+- Major rewrite on Avisynth Script handles - No more AvisynthWrapper.dll required
+- Improved Audio Encoder Interface - alignment with AVS+'s internal audio-cache granularity, reducing ReadAudio calls by ~12× vs 4096
+- Fixed eac3to 3.55 DTS-HD stream parsing and simplify type extraction - Patch by Thommy74
+- Fixed eac3to 3.55 stream parsing for new language and default-track format - Patch by Thommy74
+- Updated manifest file in order to support UTF-8 input filename
+- Enabled cuda & quick sync hardware acceleration decoding for LSMASHVideoSource & BSvideoSource
+- Added D3D12 Video Hardware Acceleration Support - mainly for BSVideoSource
+- Fixed issues #44 #53 #57 #58 #61 
+- Updated MediaInfo Libraries. 
+
+
+Changelog version 6666 20251116
+
+- Added esc keyboard shortcut to close the main UI Forms.
+- Added CTRL+G as keyboard shortcut for the "Go to Frame" button on Video Preview.
+- Added FFmpeg DTS, TrueHD, EAC-3 Audio Encoders support.
+- Defined the same video input path for Audio, Subtitles & Chapters streams in Muxers.
+- Detected properly Windows 11 25H2 versioning.
+- Enabled WebM file handling for FFMS/L-Smash Indexers. Patch by Tengsen.
+- Fixed Audio Streams selection in the One-Click Encoder.
+- Updated MediaInfo Libraries. 
+
+
+
+Changelog version 6666 20250716
+
+- Added hardware decoding support for BestSource and L-Smash input avisynth plugin.
+- Rearranged a little bit the Avisynth Extra Settings through Options.
+- Added qaac location settings through Options.
+- Added webm muxer. Patch by Lin Seng.
+- Fixed several issues in the One-Click Encoder. 
+
+
+Changelog version 6666 20250210
+
+- Updated MediaInfo libraries.
+- Fixed FFmpeg AAC VBR Mode.
+- Improved Standard Error Output Logging for Opus Transcoding.
+- Updated url to the github & forum entries.
+- Allowed WebVTT subtitle format for MP4/MKV muxing.
+- Added AV1 as supported VideoCodec for MKV Muxer.
+- Added BSBideoSource support in AVS Script Creator.
+- Targeted Project as .Net Framework 4.8.1.
+- Fixed several issues for svt-av1-psy Video Encoder.
+- Added input Bits Depth information into the log. 
+
+
+Changelog version 6666 20241125
+
+- Updated AvisynthWrapper and MediaInfo libraries.
+- Fixed issues within channel mask in audio transcoding.
+- Updated 7.1 & 6.1 avs downmix avs functions for audio transcoding.
+- Allowed dts audio streams as input for MP4 Muxer.
+- Added Windows 11 Build Revision Information.
+
+
+Changelog version 6666.2308
+
+- Introduced svt-av1-psy Video Encoder (https://github.com/gianni-rosato/svt-av1-psy)
+- Added FFV1 Video Encoder (https://ffmpeg.org/)
+- Switched update development tools server to the fork one - mainly x64 binaries in there
+- Added 10bits encoding setting for x265
+- Introduced Exhale Audio encoder (https://gitlab.com/ecodis/exhale)
+- Simplify audio transcoding channel mask use.
+- Removed mkv as input for mp4 muxing. Doesnt seems to be usable for the moment on Windows OS.
+- Fixed internal issues from audio transcoding when using channel mask.
+- HDStreamExtractor/eac3to : updated log event in order to be on par within the latest version.
+- Avoid false positive mismatch frames encoded vs frames source for final statistics.
+- Updated MediaInfo x64 library to the 24.06 release.
+- Used the same naming schemes for all indexers. Fix issue #988 (https://sourceforge.net/p/megui/bugs/988/)
+- Applied correctly the drc information from LSMASH-Works & FFMS2 as preferred audio source decoder. Fix issue #984 (https://sourceforge.net/p/megui/bugs/984/)
+- Added time modification 23 <-> 24 for audio conversion. Feature Request #690 (https://sourceforge.net/p/megui/feature-requests/690/)
+- Allowed UTF8 encoding format as Reader/Writer for avisynth input files. Feature Request #692 (https://sourceforge.net/p/megui/feature-requests/692/)
