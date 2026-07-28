@@ -258,7 +258,6 @@ namespace MeGUI
                     return iResult;
                 }
             }
-            else iResult = 3;
 
             if (iResult != 3)
             {

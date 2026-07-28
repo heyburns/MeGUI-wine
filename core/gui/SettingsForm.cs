@@ -1,3 +1,4 @@
+using System.Drawing;
 // ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
@@ -32,6 +33,25 @@ namespace MeGUI
 	/// </summary>
 	public partial class SettingsForm : Form
 	{
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
 		#region variables
         private MeGUISettings internalSettings = new MeGUISettings();
         private XmlDocument ContextHelp = new XmlDocument();
@@ -43,6 +63,9 @@ namespace MeGUI
 		public SettingsForm()
 		{
 			InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
             List<string> keys = new List<string>(LanguageSelectionContainer.Languages.Keys);
             defaultLanguage2.DataSource = defaultLanguage1.DataSource = keys;
             defaultLanguage2.BindingContext = new BindingContext();

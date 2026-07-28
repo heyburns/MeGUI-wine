@@ -49,14 +49,15 @@ namespace MeGUI.packages.audio.ffaac
             get
             {
                 FFAACSettings nas = new FFAACSettings();
-                switch ((FFAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
+                FFAACMode selectedMode = (cbMode.SelectedItem as EnumProxy)?.RealValue is FFAACMode m ? m : FFAACMode.CBR;
+                switch (selectedMode)
                 {
                     case FFAACMode.VBR: nas.BitrateMode = BitrateManagementMode.VBR; break;
                     case FFAACMode.CBR: nas.BitrateMode = BitrateManagementMode.CBR; break;
                     default: nas.BitrateMode = BitrateManagementMode.CBR; break;
                 }
-                nas.Mode = (FFAACMode)(cbMode.SelectedItem as EnumProxy).RealValue;
-                nas.Profile = (FFAACProfile)(cbProfile.SelectedItem as EnumProxy).RealValue;
+                nas.Mode = selectedMode;
+                nas.Profile = (cbProfile.SelectedItem as EnumProxy)?.RealValue is FFAACProfile p ? p : FFAACProfile.M4LC;
                 if (nas.Mode == FFAACMode.CBR)
                     nas.Bitrate = trackBar.Value;
                 else
@@ -96,6 +97,7 @@ namespace MeGUI.packages.audio.ffaac
 
         private void cbMode_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (cbMode.SelectedItem as EnumProxy == null) return;
             switch ((FFAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
             {
                 case FFAACMode.VBR:
@@ -120,6 +122,7 @@ namespace MeGUI.packages.audio.ffaac
 
         private void trackBar_ValueChanged(object sender, EventArgs e)
         {
+            if (cbMode.SelectedItem as EnumProxy == null) return;
             switch ((FFAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
             {
                 case FFAACMode.VBR:

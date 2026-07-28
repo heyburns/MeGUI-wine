@@ -85,7 +85,7 @@ namespace MeGUI
         private SourceDetectorSettings sdSettings;
         private AutoEncodeDefaultsSettings aedSettings;
         private DialogSettings dialogSettings;
-        private Point mainFormLocation, updateFormLocation;
+        private Point mainFormLocation, updateFormLocation, avisynthWindowLocation, videoPlayerLocation, fileIndexerWindowLocation;
         private Size mainFormSize, updateFormSize;
         private FileSize[] customFileSizes;
         private FPS[] customFPSs;
@@ -172,6 +172,9 @@ namespace MeGUI
             mainFormSize = new Size(713, 478);
             updateFormLocation = new Point(0, 0);
             updateFormSize = new Size(780, 313);
+            avisynthWindowLocation = new Point(-1, -1);
+            videoPlayerLocation = new Point(-1, -1);
+            fileIndexerWindowLocation = new Point(-1, -1);
             updateFormSplitter = 180;
             updateFormUpdateColumnWidth = 47;
             updateFormNameColumnWidth = 105;
@@ -276,6 +279,24 @@ namespace MeGUI
         {
             get { return mainFormLocation; }
             set { mainFormLocation = value; }
+        }
+
+        public Point AviSynthWindowLocation
+        {
+            get { return avisynthWindowLocation; }
+            set { avisynthWindowLocation = value; }
+        }
+
+        public Point VideoPlayerLocation
+        {
+            get { return videoPlayerLocation; }
+            set { videoPlayerLocation = value; }
+        }
+
+        public Point FileIndexerWindowLocation
+        {
+            get { return fileIndexerWindowLocation; }
+            set { fileIndexerWindowLocation = value; }
         }
 
         public Size MainFormSize

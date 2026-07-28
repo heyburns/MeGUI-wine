@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -124,22 +124,8 @@ namespace MeGUI
             string[] resources = myAssembly.GetManifestResourceNames();
             this.trayIcon.Icon = new Icon(myAssembly.GetManifestResourceStream(name + "App.ico"));
             this.Icon = trayIcon.Icon;
-            this.TitleText = Application.ProductName + " " + new System.Version(Application.ProductVersion).Build;
-            if (new System.Version(Application.ProductVersion).Revision != 0)
-                this.TitleText += "." + (new System.Version(Application.ProductVersion).Major) + 
-                                  "." + (new System.Version(Application.ProductVersion).Minor) +
-                                  "." + (new System.Version(Application.ProductVersion).Build) +
-                                  "." + (new System.Version(Application.ProductVersion).Revision);
-
-            this.TitleText += " " + BuildDate.ToString("yyyyMMdd");
-
-            if (MainForm.Instance.Settings.IsMeGUIx64)
-                this.TitleText += " x64";
+            this.TitleText = Application.ProductName + " " + new System.Version(Application.ProductVersion).Major + "." + new System.Version(Application.ProductVersion).Minor;
             getVersionInformation();
-            if (!MainForm.Instance.Settings.AutoUpdate)
-                this.TitleText += " UPDATE SERVER DISABLED";
-            else if (MainForm.Instance.Settings.AutoUpdateServerSubList == 0)
-                this.TitleText += " DEVELOPMENT UPDATE SERVER";
             setGUIInfo();
             Jobs.ShowAfterEncodingStatus(Settings);
             this.videoEncodingComponent1.FileType = MainForm.Instance.Settings.MainFileFormat;
@@ -1051,10 +1037,11 @@ namespace MeGUI
             // open splash screen
             SplashScreen startForm = new SplashScreen();
             startForm.Show();
+            startForm.Refresh();
             
             // prevent another instance of MeGUI from the same location
             int iCount = 0;
-            foreach (Process oProc in Process.GetProcessesByName(Application.ProductName))
+            foreach (Process oProc in Process.GetProcessesByName("MeGUI"))
             {
                 try
                 {

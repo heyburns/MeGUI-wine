@@ -380,22 +380,25 @@ namespace MeGUI
 
         private void ReadStream(StreamReader sr, ManualResetEvent rEvent, StreamType str)
         {
-            string line;
-            if (_encoderProcess != null)
+            using (sr)
             {
-                try
+                string line;
+                if (_encoderProcess != null && sr != null)
                 {
-                    while ((line = sr.ReadLine()) != null)
+                    try
                     {
-                        _mre.WaitOne();
-                        ProcessLine(line, str, ImageType.Information);
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            _mre.WaitOne();
+                            ProcessLine(line, str, ImageType.Information);
+                        }
                     }
+                    catch (Exception e)
+                    {
+                        ProcessLine("Exception in readStream. Line cannot be processed. " + e.Message, str, ImageType.Error);
+                    }
+                    rEvent.Set();
                 }
-                catch (Exception e)
-                {
-                    ProcessLine("Exception in readStream. Line cannot be processed. " + e.Message, str, ImageType.Error);
-                }
-                rEvent.Set();
             }
         }
 

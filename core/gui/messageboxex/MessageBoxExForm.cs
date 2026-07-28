@@ -183,6 +183,9 @@ namespace MeGUI.core.gui.MessageBoxExLib
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
 			
 			_maxWidth = (int)(SystemInformation.WorkingArea.Width * 0.60);
 			_maxHeight = (int)(SystemInformation.WorkingArea.Height * 0.90);

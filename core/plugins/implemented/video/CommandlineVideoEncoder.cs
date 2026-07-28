@@ -215,10 +215,11 @@ namespace MeGUI
                     Su.PercentageCurrent = 0;
                 }
                 else
-                    {
-                        Su.NbFramesDone = (ulong)iCurrentFrameNumber;
-                        Su.PercentageCurrent = (decimal)Su.NbFramesDone / Su.NbFramesTotal * 100;
-                    }
+                {
+                    Su.NbFramesDone = (ulong)iCurrentFrameNumber;
+                    if (Su.NbFramesTotal > 0)
+                        Su.PercentageCurrent = (decimal)Su.NbFramesDone / (decimal)Su.NbFramesTotal * 100M;
+                }
                 return true;
             }
             return false;

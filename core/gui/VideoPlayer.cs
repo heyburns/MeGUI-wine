@@ -71,7 +71,9 @@ namespace MeGUI
 		public VideoPlayer()
 		{
 			InitializeComponent();
-            this.Resize += new EventHandler(FormResized);
+            this.StartPosition = FormStartPosition.Manual;
+            this.ResizeEnd += new EventHandler(FormResized);
+            this.MinimumSize = new Size(520, 350);
 
             formHeightDelta = (int)((buttonPanel.Size.Height + 4 * defaultSpacing));
             buttonPanelMinWidth = (int)((showPAR.Location.X + showPAR.Size.Width));
@@ -168,6 +170,7 @@ namespace MeGUI
                 this.viewerType = type;
                 this.hasAR = hasAR;
                 zoomMaxWidth = 0;
+                zoomFactor = 100;
                 SetMaxZoomWidth();
                 DoInitialAdjustment();
                 int iStart;
@@ -175,8 +178,10 @@ namespace MeGUI
                     iStart = startFrame;
                 else
                     iStart = reader.FrameCount / 2;
+                this.positionSlider.Value = iStart;
                 videoPreview.LoadVideo(reader, file.VideoInfo.FPS, iStart);
                 SetTitleText();
+                SetScreenSize();
 				return true;
 			}
 			return false;
@@ -234,6 +239,8 @@ namespace MeGUI
                 this.positionSlider.Minimum = 0;
                 this.positionSlider.Maximum = reader.FrameCount - 1;
                 this.positionSlider.TickFrequency = this.positionSlider.Maximum / 20;
+                zoomMaxWidth = 0;
+                zoomFactor = 100;
                 SetMaxZoomWidth();
                 DoInitialAdjustment();
                 int iStart;
@@ -268,7 +275,11 @@ namespace MeGUI
         {
             bOriginalSize = true;
             zoomWidth = (int)file.VideoInfo.Width;
-            zoomFactor = (int)((double)zoomWidth / zoomMaxWidth * 100.0);
+            SetMaxZoomWidth();
+            if (zoomMaxWidth > 0)
+                zoomFactor = (int)((double)zoomWidth / zoomMaxWidth * 100.0);
+            else
+                zoomFactor = 100;
             SetZoomButtons();
             resize(zoomWidth, showPAR.Checked);
         }
@@ -292,10 +303,10 @@ namespace MeGUI
         private void btnFitScreen_Click(object sender, EventArgs e)
         {
             bOriginalSize = false;
-            zoomWidth = zoomMaxWidth;
             zoomFactor = 100;
             SetZoomButtons();
             SetMaxZoomWidth();
+            zoomWidth = zoomMaxWidth;
             resize(zoomWidth, showPAR.Checked);
         }
 
@@ -367,64 +378,49 @@ namespace MeGUI
             }
         }
 
+        private Rectangle SafeWorkingArea
+        {
+            get
+            {
+                try
+                {
+                    if (this.IsHandleCreated)
+                    {
+                        return Screen.FromControl(this).WorkingArea;
+                    }
+                }
+                catch { }
+                return Screen.PrimaryScreen.WorkingArea;
+            }
+        }
+
         /// <summary>
         /// sets the maximum zoom width so that the video fits the screen including controls
         /// </summary>
         private void SetMaxZoomWidth()
         {
-            Size oSizeScreen = Screen.GetWorkingArea(this).Size;
+            Size oSizeScreen = SafeWorkingArea.Size;
             int iScreenHeight = oSizeScreen.Height - 2 * SystemInformation.FixedFrameBorderSize.Height;
             int iScreenWidth = oSizeScreen.Width - 2 * SystemInformation.FixedFrameBorderSize.Width;
 
-            // does the video fit into the screen?
-            if ((int)file.VideoInfo.Height + formHeightDelta > iScreenHeight ||
-                (int)file.VideoInfo.Width > iScreenWidth)
-            {
-                Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
-                if (showPAR.Checked) d = arChooser.Value ?? d;
+            Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
+            if (showPAR.Checked) d = arChooser.Value ?? d;
 
-                int height;
-                if ((int)file.VideoInfo.Width > iScreenWidth)
-                {
-                    zoomMaxWidth = iScreenWidth;
-                    height = (int)Math.Round((decimal)zoomMaxWidth / d.AR);
-                    if (height + formHeightDelta > iScreenHeight)
-                    {
-                        height = iScreenHeight - formHeightDelta;
-                        zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
-                    }
-                }
-                else
-                {
-                    height = iScreenHeight - formHeightDelta;
-                    zoomMaxWidth = (int)Math.Round((decimal)height * d.AR);
-                }
-                videoWindowWidth = zoomMaxWidth;
-                videoWindowHeight = height;
+            int maxAvailHeight = Math.Max(180, iScreenHeight - formHeightDelta);
+            int maxAvailWidth = Math.Max(320, iScreenWidth);
+
+            double origW = file.VideoInfo.Width;
+            double origH = (d.AR > 0) ? (origW / (double)d.AR) : file.VideoInfo.Height;
+
+            if (origW > maxAvailWidth || origH > maxAvailHeight)
+            {
+                double scale = Math.Min(maxAvailWidth / origW, maxAvailHeight / origH);
+                zoomMaxWidth = Math.Max(320, (int)Math.Round(origW * scale));
             }
             else
             {
                 zoomMaxWidth = (int)file.VideoInfo.Width;
-                videoWindowWidth = zoomMaxWidth;
-                videoWindowHeight = (int)file.VideoInfo.Height;
             }
-
-            if (zoomFactor != 100)
-            {
-                zoomWidth = (int)(zoomMaxWidth * zoomFactor / 100);
-                Dar d = new Dar(file.VideoInfo.Width, file.VideoInfo.Height);
-                if (showPAR.Checked)
-                    d = arChooser.Value ?? d;
-                int height = (int)Math.Round((decimal)zoomWidth / d.AR);
-                videoWindowWidth = zoomWidth;
-                videoWindowHeight = (int)height;
-            }
-
-            if (zoomMaxWidth < zoomWidth)
-                if (!bOriginalSize)
-                    btnFitScreen_Click(null, null);
-                else
-                    originalSizeButton_Click(null, null);
         }
 
         private void DoInitialAdjustment()
@@ -474,9 +470,12 @@ namespace MeGUI
             sizeLock = true;
 
             // Get screen dimensions
-            Size oSizeScreen = Screen.GetWorkingArea(this).Size;
+            Size oSizeScreen = SafeWorkingArea.Size;
             int iScreenWidth = oSizeScreen.Width - 2 * SystemInformation.FixedFrameBorderSize.Width;
             int iScreenHeight = oSizeScreen.Height - 2 * SystemInformation.FixedFrameBorderSize.Height;
+
+            videoWindowWidth = Math.Max(320, videoWindowWidth);
+            videoWindowHeight = Math.Max(180, videoWindowHeight);
 
             // Respect min width for controls
             int videoPanelWidth = Math.Max(videoWindowWidth, buttonPanelMinWidth);
@@ -519,16 +518,23 @@ namespace MeGUI
 
         private void FormResized(object sender, EventArgs e)
         {
-            if (!sizeLock)
+            if (sizeLock || this.WindowState == FormWindowState.Minimized)
+                return;
+
+            int targetW = this.ClientSize.Width;
+            if (targetW < buttonPanelMinWidth || file == null || file.VideoInfo.Width == 0)
+                return;
+
+            if (Math.Abs(targetW - videoWindowWidth) > 10)
             {
-                Control formControl = (Control)sender;
-                if ((formControl.Width <= this.MaximumSize.Width) &&
-                    (formControl.Height <= this.MaximumSize.Height) &&
-                    (formControl.Width >= this.MinimumSize.Width) &&
-                    (formControl.Height >= this.MinimumSize.Height))
+                sizeLock = true;
+                try
                 {
-                    // Unusable without events from .NET 2.0 
-                    resize(formControl.Width, showPAR.Checked);
+                    resize(targetW, showPAR.Checked);
+                }
+                finally
+                {
+                    sizeLock = false;
                 }
             }
         }
@@ -548,11 +554,35 @@ namespace MeGUI
                     e.Cancel = true; return;
             }
 
+            if (this.WindowState == FormWindowState.Normal && this.Location.X > 10 && this.Location.Y > 10)
+                MainForm.Instance.Settings.VideoPlayerLocation = this.Location;
+
             this.Visible = false;
             videoPreview.UnloadVideo();
             file?.Dispose();
 			base.OnClosing(e);
 		}
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Point saved = MainForm.Instance.Settings.VideoPlayerLocation;
+            if (saved.X > 10 && saved.Y > 10)
+            {
+                this.Location = saved;
+            }
+            else
+            {
+                Form owner = this.Owner ?? MainForm.Instance;
+                if (owner != null)
+                {
+                    this.Location = new Point(
+                        owner.Location.X + (owner.Width - this.Width) / 2,
+                        owner.Location.Y + (owner.Height - this.Height) / 2
+                    );
+                }
+            }
+        }
 		#endregion
 		
 		#region position changes
@@ -1000,24 +1030,27 @@ namespace MeGUI
 
         private void VideoPlayer_Shown(object sender, EventArgs e)
         {
-            Size oSizeScreen = Screen.GetWorkingArea(this).Size;
-            Point oLocation = Screen.GetWorkingArea(this).Location;
+
+            Size oSizeScreen = SafeWorkingArea.Size;
+            Point oLocation = SafeWorkingArea.Location;
             int iScreenHeight = oSizeScreen.Height - 2 * SystemInformation.FixedFrameBorderSize.Height;
             int iScreenWidth = oSizeScreen.Width - 2 * SystemInformation.FixedFrameBorderSize.Width;
             
             if (this.Size.Height >= iScreenHeight)
                 this.Location = new Point(this.Location.X, oLocation.Y + 5);
-            else if (this.Location.Y <= oLocation.Y)
+            else if (this.Location.Y < oLocation.Y)
                 this.Location = new Point(this.Location.X, oLocation.Y + 5);
             else if (this.Location.Y + this.Size.Height > iScreenHeight)
                 this.Location = new Point(this.Location.X, iScreenHeight - this.Size.Height);
 
             if (this.Size.Width >= iScreenWidth)
                 this.Location = new Point(oLocation.X + 3, this.Location.Y);
-            else if (this.Location.X <= oLocation.X)
+            else if (this.Location.X < oLocation.X)
                 this.Location = new Point(oLocation.X + 3, this.Location.Y);
             else if (this.Location.X + this.Size.Width > iScreenWidth)
                 this.Location = new Point(iScreenWidth - this.Size.Width, this.Location.Y);
+
+            videoPreview.UpdateVideo();
         }
 	}
 }

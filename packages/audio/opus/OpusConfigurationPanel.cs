@@ -116,7 +116,7 @@ namespace MeGUI.packages.audio.opus
                 if (cbMode.SelectedIndex == 0) oas.BitrateMode = BitrateManagementMode.VBR;
                 if (cbMode.SelectedIndex == 1) oas.BitrateMode = BitrateManagementMode.VBR;
                 if (cbMode.SelectedIndex == 2) oas.BitrateMode = BitrateManagementMode.CBR;
-                oas.Mode = (OpusMode)(cbMode.SelectedItem as EnumProxy).RealValue;
+                oas.Mode = (cbMode.SelectedItem as EnumProxy)?.RealValue is OpusMode m ? m : OpusMode.VBR;
                 oas.Bitrate = (int)trackBar.Value;
                 return oas;
             }

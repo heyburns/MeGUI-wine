@@ -30,9 +30,31 @@ namespace MeGUI.core.gui
 {
     public partial class InputBox : Form
     {
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
         private InputBox()
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
         }
 
         private void btnOk_Click(object sender, EventArgs e)

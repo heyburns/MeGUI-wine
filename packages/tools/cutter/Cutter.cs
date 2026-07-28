@@ -30,6 +30,25 @@ namespace MeGUI.packages.tools.cutter
 {
     public partial class Cutter : Form
     {
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
         private bool cutsAdded = false;
 
         private VideoPlayer player;
@@ -39,6 +58,9 @@ namespace MeGUI.packages.tools.cutter
         public Cutter(string scriptName)
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
             this.scriptName = scriptName;
 
             transitionStyle.DataSource = EnumProxy.CreateArray(typeof(TransitionStyle));

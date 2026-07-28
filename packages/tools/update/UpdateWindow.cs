@@ -33,6 +33,25 @@ namespace MeGUI
 {
     public partial class UpdateWindow : Form
     {
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
         #region Variables
         private ListViewColumnSorter lvwColumnSorter;
         private bool bUpdateAllowed;
@@ -715,6 +734,9 @@ namespace MeGUI
         public UpdateWindow()
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
             lvwColumnSorter = new ListViewColumnSorter();
             this.listViewDetails.ListViewItemSorter = lvwColumnSorter;
             lvwColumnSorter.SortColumn = 1;

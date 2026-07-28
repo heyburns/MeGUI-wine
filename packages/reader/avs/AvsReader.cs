@@ -84,30 +84,37 @@ namespace MeGUI
                     lib     = AvsLibrary.Load();
                     session = new AvsSession(lib);
 
-                    string evalScript = isFile
+                    string rawScript = isFile
                         ? string.Format("Import(\"{0}\")", scriptOrPath.Replace("\\", "\\\\"))
                         : scriptOrPath;
 
-                    clip = session.EvalScript(evalScript);
+                    IntPtr origClip = session.EvalScript(rawScript);
+                    AviSynthColorspace origColorspace = GetColorspaceFromProbe(lib, origClip);
+                    AvsProbe.StreamInfo originalInfo = AvsProbe.Probe(lib, session, origClip);
 
-                    // Get original colorspace (raw pixel_type from VideoInfo)
-                    AviSynthColorspace origColorspace = GetColorspaceFromProbe(lib, clip);
-
-                    AvsProbe.StreamInfo info = AvsProbe.Probe(lib, session, clip);
-
-                    // Keep the original probe result before any conversion
-                    AvsProbe.StreamInfo originalInfo = info;
-
+                    clip = origClip;
+                    AvsProbe.StreamInfo info = originalInfo;
                     string convertError = null;
+
                     if (requireRGB24 && info.Width > 0)
                     {
-                        // Apply ConvertToRGB24 for frame reading; retain the pre-conversion colorspace
-                        IntPtr rgb24Clip = TryConvertToRGB24(lib, session, clip, evalScript, out convertError);
-                        if (rgb24Clip != IntPtr.Zero)
+                        try
                         {
-                            lib.ReleaseClip(clip);
-                            clip = rgb24Clip;
-                            info = AvsProbe.Probe(lib, session, clip);
+                            string rgb24Script = isFile
+                                ? string.Format("__megui_c = Import(\"{0}\")\ntry {{\n  __megui_c = ConvertBits(__megui_c, 8)\n}} catch(e) {{\n}}\ntry {{\n  __megui_c = ConvertToRGB24(__megui_c)\n}} catch(e) {{\n  __megui_c = ConvertToRGB24(ConvertBits(__megui_c, 8))\n}}\nreturn __megui_c", scriptOrPath.Replace("\\", "\\\\"))
+                                : string.Format("function __megui_eval_temp() {{\n{0}\n}}\n__megui_c = __megui_eval_temp()\ntry {{\n  __megui_c = ConvertBits(__megui_c, 8)\n}} catch(e) {{\n}}\ntry {{\n  __megui_c = ConvertToRGB24(__megui_c)\n}} catch(e) {{\n  __megui_c = ConvertToRGB24(ConvertBits(__megui_c, 8))\n}}\nreturn __megui_c", scriptOrPath);
+
+                            IntPtr rgb24Clip = session.EvalScript(rgb24Script);
+                            if (rgb24Clip != IntPtr.Zero)
+                            {
+                                lib.ReleaseClip(origClip);
+                                clip = rgb24Clip;
+                                info = AvsProbe.Probe(lib, session, clip);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            convertError = ex.Message;
                         }
                     }
 
@@ -136,26 +143,6 @@ namespace MeGUI
             if (viPtr == IntPtr.Zero) return AviSynthColorspace.Unknown;
             int pixelType = Marshal.ReadInt32(viPtr, 20);
             return (AviSynthColorspace)pixelType;
-        }
-        private static IntPtr TryConvertToRGB24(AvsLibrary lib, AvsSession session, IntPtr clip,
-                                                string evalScript, out string error)
-        {
-            error = null;
-            try
-            {
-                // Re-evaluate the original script with ConvertToRGB24() appended.
-                // We cannot rely on AviSynth's implicit 'last' variable because it
-                // does not persist across separate avs_invoke("Eval", ...) calls.
-                // Any expensive source indexing (e.g. LWI) is cached from the first
-                // evaluation and will not be repeated.
-                string rgb24Script = evalScript + "\nConvertToRGB24()";
-                return session.EvalScript(rgb24Script);
-            }
-            catch (Exception ex)
-            {
-                error = ex.Message;
-                return IntPtr.Zero;
-            }
         }
 
         // ── Constructor ───────────────────────────────────────────────────────

@@ -46,7 +46,7 @@ namespace MeGUI
         public AviSynthSettings()
         {
             this.Template = "<input>\r\n<deinterlace>\r\n<crop>\r\n<resize>\r\n<denoise>\r\n"; // Default -- will act as it did before avs profiles
-            this.resize = true;
+            this.resize = false;
             this.resizeMethod = ResizeFilterType.Lanczos; // Lanczos
             this.preferAnimeDeinterlace = false;
             this.denoise = false;

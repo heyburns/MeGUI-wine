@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -58,7 +58,7 @@ namespace MeGUI.packages.audio.exhale
                 //    default: nas.BitrateMode = BitrateManagementMode.CBR; break;
                 //}
                 //nas.Mode = (ExhaleMode)(cbMode.SelectedItem as EnumProxy).RealValue;
-                nas.Profile = (ExhaleProfile)(cbProfile.SelectedItem as EnumProxy).RealValue;
+                nas.Profile = (cbProfile.SelectedItem as EnumProxy)?.RealValue is ExhaleProfile p ? p : ExhaleProfile.xHEAAC;
                 //if (nas.Mode == ExhaleMode.CBR)
                 //    nas.Bitrate = trackBar.Value;
                 //else
@@ -92,6 +92,7 @@ namespace MeGUI.packages.audio.exhale
 
         private void trackBar_ValueChanged(object sender, EventArgs e)
         {
+            if (cbProfile.SelectedItem as EnumProxy == null) return;
             switch ((ExhaleProfile)(cbProfile.SelectedItem as EnumProxy).RealValue)
             {
                 case ExhaleProfile.xHEAAC:
@@ -130,6 +131,7 @@ namespace MeGUI.packages.audio.exhale
 
         private void cbProfile_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (cbProfile.SelectedItem as EnumProxy == null) return;
             switch ((ExhaleProfile)(cbProfile.SelectedItem as EnumProxy).RealValue)
             {
                 case ExhaleProfile.xHEAAC:

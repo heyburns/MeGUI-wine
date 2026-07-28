@@ -43,11 +43,11 @@ namespace MeGUI.core.gui
                 AviSynthSettings oSettings = new AviSynthSettings();
                 oSettings.Template = avisynthScript.Text;
                 oSettings.Resize = resize.Checked;
-                oSettings.ResizeMethod = (ResizeFilterType)(resizeFilterType.SelectedItem as EnumProxy).RealValue;
+                oSettings.ResizeMethod = (resizeFilterType.SelectedItem as EnumProxy)?.RealValue is ResizeFilterType r ? r : ResizeFilterType.Lanczos;
                 oSettings.NvResize = chkNvResize.Checked;
                 oSettings.PreferAnimeDeinterlace = cbPreferAnimeDeinterlacing.Checked;
                 oSettings.Denoise = noiseFilter.Checked;
-                oSettings.DenoiseMethod = (DenoiseFilterType)(noiseFilterType.SelectedItem as EnumProxy).RealValue;
+                oSettings.DenoiseMethod = (noiseFilterType.SelectedItem as EnumProxy)?.RealValue is DenoiseFilterType d ? d : DenoiseFilterType.MinimalNoise;
                 oSettings.MPEG2Deblock = mpeg2Deblocking.Checked;
                 oSettings.ColourCorrect = colourCorrect.Checked;
                 oSettings.Mod16Method = (!signalAR.Checked ? mod16Method.none : (mod16Method)mod16Box.SelectedIndex);

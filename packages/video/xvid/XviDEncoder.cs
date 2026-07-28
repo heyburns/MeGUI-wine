@@ -118,6 +118,9 @@ new JobProcessorFactory(new ProcessorFactory(init), "XviDEncoder");
                 if (!MainForm.Instance.Settings.IsMeGUIx64 && MainForm.Instance.Settings.IsOSx64)
                     strWOWkey = @"Wow6432Node\";
 
+                if (String.IsNullOrEmpty(guid))
+                    guid = "{E6D6B700-124D-11D4-86F3-DB80AFD98778}";
+
                 // try to find the avisynth.dll entry
                 string strAViSynthDLL = (string)Microsoft.Win32.Registry.GetValue(@"HKEY_CLASSES_ROOT\" + strWOWkey + @"CLSID\" + guid + @"\InProcServer32", null, string.Empty);
                 if (String.IsNullOrEmpty(strAViSynthDLL) || !strAViSynthDLL.ToLowerInvariant().Equals("avisynth.dll"))

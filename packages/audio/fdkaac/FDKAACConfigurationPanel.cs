@@ -49,14 +49,15 @@ namespace MeGUI.packages.audio.fdkaac
             get
             {
                 FDKAACSettings nas = new FDKAACSettings();
-                switch ((FdkAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
+                FdkAACMode selectedMode = (cbMode.SelectedItem as EnumProxy)?.RealValue is FdkAACMode m ? m : FdkAACMode.CBR;
+                switch (selectedMode)
                 {
                     case FdkAACMode.VBR: nas.BitrateMode = BitrateManagementMode.VBR; break;
                     case FdkAACMode.CBR: nas.BitrateMode = BitrateManagementMode.CBR; break;
                     default: nas.BitrateMode = BitrateManagementMode.CBR; break;
                 }
-                nas.Mode = (FdkAACMode)(cbMode.SelectedItem as EnumProxy).RealValue;
-                nas.Profile = (FdkAACProfile)(cbProfile.SelectedItem as EnumProxy).RealValue;
+                nas.Mode = selectedMode;
+                nas.Profile = (cbProfile.SelectedItem as EnumProxy)?.RealValue is FdkAACProfile p ? p : FdkAACProfile.M4LC;
                 if (nas.Mode == FdkAACMode.CBR)
                     nas.Bitrate = (int)trackBar.Value;
                 else
@@ -96,6 +97,7 @@ namespace MeGUI.packages.audio.fdkaac
 
         private void cbMode_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (cbMode.SelectedItem as EnumProxy == null) return;
             switch ((FdkAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
             {
                 case FdkAACMode.VBR:
@@ -119,6 +121,7 @@ namespace MeGUI.packages.audio.fdkaac
 
         private void trackBar_ValueChanged(object sender, EventArgs e)
         {
+            if (cbMode.SelectedItem as EnumProxy == null) return;
             switch ((FdkAACMode)(cbMode.SelectedItem as EnumProxy).RealValue)
             {
                 case FdkAACMode.VBR:

@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using MeGUI.core.details;
 using MeGUI.core.util;
@@ -82,6 +83,7 @@ namespace MeGUI
         public FileIndexerWindow(MainForm mainForm)
         {
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
             CheckDGIIndexer();
         }
 
@@ -803,6 +805,34 @@ namespace MeGUI
                 return true;
             }
             return base.ProcessDialogKey(keyData);
+        }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Normal && this.Location.X > 10 && this.Location.Y > 10)
+                MainForm.Instance.Settings.FileIndexerWindowLocation = this.Location;
+            base.OnClosing(e);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Point saved = MainForm.Instance.Settings.FileIndexerWindowLocation;
+            if (saved.X > 10 && saved.Y > 10)
+            {
+                this.Location = saved;
+            }
+            else
+            {
+                Form owner = this.Owner ?? MainForm.Instance;
+                if (owner != null)
+                {
+                    this.Location = new Point(
+                        owner.Location.X + (owner.Width - this.Width) / 2,
+                        owner.Location.Y + (owner.Height - this.Height) / 2
+                    );
+                }
+            }
         }
     }
 

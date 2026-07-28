@@ -28,38 +28,56 @@ namespace MeGUI.core.gui
 {
     public partial class VideoPlayerControl : UserControl
     {
+        private readonly ReaderWriterLock readerWriterLock = new ReaderWriterLock();
+        private readonly object positionLock = new object();
+        private readonly object frameLock = new object();
+        private readonly Timer playTimer;
+
+        private Bitmap currentFrame;
+        private int position;
+        private IVideoReader videoReader;
+        private double framerate = 25;
+        private Padding cropMargin;
+        private bool displayActualFramerate;
+        private bool ensureCorrectPlaybackSpeed;
+        private double speedUp = 1d;
+        private bool isPlaying;
+        private double actualFramerate;
+        private long fetchToken = 0;
+
+        public event EventHandler PositionChanged;
+
         public VideoPlayerControl()
         {
             InitializeComponent();
+
+            SetStyle(ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.UserPaint |
+                     ControlStyles.DoubleBuffer |
+                     ControlStyles.Opaque |
+                     ControlStyles.ResizeRedraw, true);
+            UpdateStyles();
+
             playTimer = new Timer(PlayNextFrame);
         }
 
-        //ensures that UnloadVideo only returns if the reader is not used by other threads any more
-        private readonly ReaderWriterLock readerWriterLock = new ReaderWriterLock();
-
-        #region current frame position handling
-        public event EventHandler PositionChanged;
+        #region Position Handling
         public void OnPositionChanged()
         {
-            PositionChanged?.Invoke(this, new EventArgs());
+            PositionChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private object positionLock = new object();
-        
         private bool OffsetPosition(int offset, bool update)
         {
             bool success;
-            //ensures that the correct offset is always added even
-            //if multiple threads are calling this methods (e.g. playback)
             lock (positionLock)
             {
-                //Position property ensures that position does not get out of bounds
                 success = SetPositionInternal(position + offset);
             }
 
             InvokeOnPositionChanged();
 
-            if(update) 
+            if (update)
                 UpdateVideo();
 
             return success;
@@ -73,197 +91,101 @@ namespace MeGUI.core.gui
         private bool SetPositionInternal(int value)
         {
             int max = FrameCount - 1;
+            if (value < 0) value = 0;
+            else if (value > max) value = max;
 
-            //Prevent setting the position out of range
-            if (value < 0)
-                value = 0;
-            else if (value > max)
-                value = max;
-
-            //position unchanged
-            if (position == value) 
-                return false;
+            if (position == value) return false;
 
             position = value;
-
             return true;
         }
 
         public void InvokeOnPositionChanged()
-        {            
-            //HACK: Invoke does not work before handle is created
-            if (initalized)
+        {
+            if (IsHandleCreated && !IsDisposed && InvokeRequired)
                 Invoke(new SimpleDelegate(OnPositionChanged));
             else
                 OnPositionChanged();
         }
         #endregion
 
-        #region Rendering
+        #region Rendering & Painting
         public void UpdateVideo()
         {
-            renderEvent.Set();
+            if (IsDisposed) return;
+
+            int pos = position;
+            long currentToken = Interlocked.Increment(ref fetchToken);
+
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Bitmap newFrame = GetFrame(pos);
+                if (newFrame != null)
+                {
+                    if (Interlocked.Read(ref fetchToken) == currentToken)
+                    {
+                        lock (frameLock)
+                        {
+                            currentFrame?.Dispose();
+                            currentFrame = newFrame;
+                        }
+
+                        if (IsHandleCreated && !IsDisposed)
+                        {
+                            BeginInvoke((MethodInvoker)Invalidate);
+                        }
+                    }
+                    else
+                    {
+                        newFrame.Dispose();
+                    }
+                }
+            });
         }
 
-        /// <summary>
-        /// Resizes the video frame
-        /// http://www.peterprovost.org/archive/2003/05/29/516.aspx
-        /// </summary>
-        /// <param name="b"></param>
-        /// <param name="nWidth"></param>
-        /// <param name="nHeight"></param>
-        /// <returns>A resized bitmap (needs disposal)</returns>
-        private Bitmap ResizeBitmap(Bitmap b, int nWidth, int nHeight)
+        protected override void OnPaint(PaintEventArgs e)
         {
-            float factorX = nWidth / (float)b.Width;
-            float factorY = nHeight / (float)b.Height;
+            base.OnPaint(e);
+            Graphics g = e.Graphics;
 
-            //calculate source and destination rectangles with applied cropping values
-            RectangleF src = new RectangleF(cropMargin.Left, cropMargin.Top, b.Width - cropMargin.Horizontal, b.Height - cropMargin.Vertical);
-            RectangleF dst = new RectangleF(cropMargin.Left * factorX, cropMargin.Top * factorY, (b.Width - cropMargin.Horizontal) * factorX, (b.Height - cropMargin.Vertical) * factorY);
-
-            Bitmap result = new Bitmap(nWidth, nHeight);
-            using (Graphics g = Graphics.FromImage(result))
+            lock (frameLock)
             {
-                //apply cropping
-                using (Region reg = new Region())
+                if (currentFrame != null && currentFrame.Width > 0 && currentFrame.Height > 0)
                 {
-                    reg.MakeInfinite();
-                    reg.Exclude(dst);
-                    g.FillRegion(Brushes.White, reg);
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+                    float uncroppedW = Math.Max(1, currentFrame.Width - cropMargin.Horizontal);
+                    float uncroppedH = Math.Max(1, currentFrame.Height - cropMargin.Vertical);
+
+                    float scale = Math.Min(this.Width / uncroppedW, this.Height / uncroppedH);
+
+                    float drawWidth = uncroppedW * scale;
+                    float drawHeight = uncroppedH * scale;
+                    float drawX = (this.Width - drawWidth) / 2f;
+                    float drawY = (this.Height - drawHeight) / 2f;
+
+                    RectangleF src = new RectangleF(
+                        cropMargin.Left,
+                        cropMargin.Top,
+                        uncroppedW,
+                        uncroppedH);
+
+                    RectangleF dst = new RectangleF(drawX, drawY, drawWidth, drawHeight);
+
+                    g.Clear(Color.Black);
+                    g.DrawImage(currentFrame, dst, src, GraphicsUnit.Pixel);
+
+                    if (displayActualFramerate)
+                    {
+                        g.DrawString(actualFramerate.ToString("0.00 fps"), Font, Brushes.Lime, 5, 5);
+                    }
                 }
-
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
-                //g.DrawImage(b, 0, 0, nWidth, nHeight);
-                g.DrawImage(b, dst, src, GraphicsUnit.Pixel);
-
-                if (DisplayActualFramerate)
-                {
-                    g.DrawString(ActualFramerate.ToString("0.00 fps"), Font, Brushes.Green, 0, 0);
-                }
-            }
-            return result;
-        }
-        #endregion
-
-        #region Video Playback
-        //asynchronous Timer to update video in fixed interval
-        readonly Timer playTimer;
-
-        /// <summary>
-        /// Is Invoked by playTimer to render the next frame for the video
-        /// It will trigger the playThread to render the next frame.
-        /// This solution is more complex than a simple Thread.Sleep, but
-        /// has the advantage that the playback will be smoother if the frames
-        /// take long to render.
-        /// </summary>
-        private void PlayNextFrame(object state)
-        {
-            try
-            {
-                //playback speed is correct, but frames may be dropped if computer is too slow
-                if (EnsureCorrectPlaybackSpeed)
-                {
-                    if (!OffsetPosition(1, false)) 
-                        Stop();
-                    else 
-                        InvokeOnPositionChanged();
-
-                    UpdateVideo();
-                }
-                //no frames will be dropped, but the playback speed might be slower than realtime
                 else
                 {
-                    nextFrameEvent.Set();
+                    g.Clear(Color.Black);
                 }
-
-                //Console.WriteLine("Frame {0} requested", Position);
             }
-            catch (Exception e)
-            {
-                MeGUI.core.util.LogItem _oLog = MainForm.Instance.Log.Info("Error");
-                _oLog.LogValue("playNextFrame", e, MeGUI.core.util.ImageType.Error);
-            }
-        }
-
-        //is set by the timer to indicate that the position must be advanced in addition to the rendering.
-        //if the position would be incremented directly in playNextFrame, slow computers would drop frames.
-        //with this method the computer will always display every frame
-        private readonly AutoResetEvent nextFrameEvent = new AutoResetEvent(false);
-
-        //is set to trigger the rendering of the current frame
-        private readonly AutoResetEvent renderEvent = new AutoResetEvent(false);
-
-        private void RenderThreadLoop()
-        {
-            int framesPlayed = 0;
-            DateTime start = DateTime.Now;
-            Bitmap finalBitmap = null;
-
-            do
-            {
-                DateTime end = DateTime.Now;
-                TimeSpan renderTime = end - start;
-
-                //do not update current framerate more often than 200ms
-                if (renderTime.Milliseconds > 200 && framesPlayed > 0)
-                {
-                    //average results
-                    actualFramerate = 0.9d * actualFramerate + 0.1d * (TimeSpan.TicksPerSecond / (double)renderTime.Ticks) * framesPlayed;
-                    start = end;
-                    framesPlayed = 0;
-                }
-
-                if (WaitHandle.WaitAny(new WaitHandle[] { nextFrameEvent, renderEvent }) == 0)
-                {
-                    if (!OffsetPosition(1, false))
-                        Stop();
-                    else
-                        InvokeOnPositionChanged();
-                }
-
-                int pos = position;
-
-                try
-                {
-                    using (Bitmap b = GetFrame(pos))
-                    {
-                        if (b == null)
-                            continue;
-
-                        //if (cropMargin != Padding.Empty) // only crop when necessary            
-                        //    cropImage(b);
-
-                        finalBitmap = ResizeBitmap(b, videoPreview.Width, videoPreview.Height);
-                    }
-
-                    using (videoPreview.Image) // get rid of previous bitmap
-                    {
-                        //do the actual rendering on GUI thread
-                        Invoke((SimpleDelegate)(delegate { videoPreview.Image = finalBitmap; }));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Could not read AVS frame.", "Video Player Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                    MeGUI.core.util.LogItem _oLog = MainForm.Instance.AVSScriptCreatorLog;
-                    if (_oLog == null)
-                    {
-                        _oLog = MainForm.Instance.Log.Info("AVS Script Creator");
-                        MainForm.Instance.AVSScriptCreatorLog = _oLog;
-                    }
-                    _oLog.LogValue("Could not read frame", ex.Message, MeGUI.core.util.ImageType.Warning, true);
-
-                    break;
-                }
-
-                //needed for fps display
-                framesPlayed++;
-
-            } while (!IsDisposed);
-
-            finalBitmap?.Dispose();
         }
 
         private Bitmap GetFrame(int pos)
@@ -271,22 +193,32 @@ namespace MeGUI.core.gui
             readerWriterLock.AcquireReaderLock(Timeout.Infinite);
             try
             {
-                IVideoReader reader = VideoReader;
-                if (reader == null) 
-                    return null;
+                IVideoReader reader = videoReader;
+                if (reader == null) return null;
                 return reader.ReadFrameBitmap(pos);
+            }
+            catch
+            {
+                return null;
             }
             finally
             {
                 readerWriterLock.ReleaseReaderLock();
             }
         }
+        #endregion
 
-        private bool isPlaying;
+        #region Video Playback
+        private void PlayNextFrame(object state)
+        {
+            try
+            {
+                if (!OffsetPosition(1, true))
+                    Stop();
+            }
+            catch { }
+        }
 
-        /// <summary>
-        /// Start the playing of the video
-        /// </summary>
         public void Play()
         {
             if (videoReader == null)
@@ -294,41 +226,25 @@ namespace MeGUI.core.gui
 
             playTimer.Change(0, (int)(1000d / (Framerate * SpeedUp)));
             isPlaying = true;
-
             actualFramerate = Framerate * SpeedUp;
         }
 
-        /// <summary>
-        /// Stops the playing of the video
-        /// </summary>
         public void Stop()
         {
             playTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            nextFrameEvent.Reset();
-            renderEvent.Reset();
             isPlaying = false;
-
             actualFramerate = 0;
         }
         #endregion
 
-        #region LoadVideo
-        public void LoadVideo(IVideoReader reader)
-        {
-            LoadVideo(reader, 25, 0);
-        }
-
-        public void LoadVideo(IVideoReader reader, double fps)
-        {
-            LoadVideo(reader, fps, 0);
-        }
+        #region Load/Unload Video
+        public void LoadVideo(IVideoReader reader) => LoadVideo(reader, 25, 0);
+        public void LoadVideo(IVideoReader reader, double fps) => LoadVideo(reader, fps, 0);
 
         public void LoadVideo(IVideoReader reader, double fps, int startPosition)
         {
             UnloadVideo();
 
-            //just to be sure... shouldn't be necessary because after UnloadVideo
-            //videoReader will be null
             readerWriterLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
@@ -339,14 +255,16 @@ namespace MeGUI.core.gui
                 readerWriterLock.ReleaseWriterLock();
             }
 
-            Framerate = fps;
-            Position = startPosition;
+            framerate = fps;
+            position = startPosition;
+            UpdateVideo();
+            InvokeOnPositionChanged();
         }
+
         public void UnloadVideo()
         {
             Stop();
-            //ensures that no other thread uses the reader at the moment,
-            //so that the video file can be safely disposed when the method returns
+
             readerWriterLock.AcquireWriterLock(Timeout.Infinite);
             try
             {
@@ -356,37 +274,40 @@ namespace MeGUI.core.gui
             {
                 readerWriterLock.ReleaseWriterLock();
             }
+
+            lock (frameLock)
+            {
+                currentFrame?.Dispose();
+                currentFrame = null;
+            }
+
             position = 0;
+            Invalidate();
         }
         #endregion
 
-
-        #region Event Handler
-        private void VideoPlayerControl_Resize(object sender, EventArgs e)
+        #region Event Handlers
+        protected override void OnHandleCreated(EventArgs e)
         {
+            base.OnHandleCreated(e);
             UpdateVideo();
         }
+
+        private void VideoPlayerControl_Resize(object sender, EventArgs e)
+        {
+            Invalidate();
+        }
+
         private void VideoPlayerControl_Load(object sender, EventArgs e)
         {
-            initalized = true;
-
-            //Thread for video playing
-            renderThread = new Thread(RenderThreadLoop)
-            {
-                Name = "Render Thread"
-            };
-            renderThread.Start();
+            UpdateVideo();
         }
         #endregion
 
         #region Properties
-        private int position;
         public int Position
         {
-            get
-            {
-                return position;
-            }
+            get => position;
             set
             {
                 if (SetPositionInternal(value))
@@ -397,31 +318,17 @@ namespace MeGUI.core.gui
             }
         }
 
-        private IVideoReader videoReader;
-        public IVideoReader VideoReader
-        {
-            get
-            {
-                return videoReader;
-            }
-        }
+        public IVideoReader VideoReader => videoReader;
 
-        private double framerate = 25;
         public double Framerate
         {
-            get
-            {
-                return framerate;
-            }
+            get => framerate;
             set
             {
                 if (value <= 0)
                     throw new ArgumentOutOfRangeException(nameof(value), "FPS cannot be zero or lower");
                 framerate = value;
-
-                //Restart video to adjust playback speed for new framerate value
-                if (isPlaying)
-                    Play();
+                if (isPlaying) Play();
             }
         }
 
@@ -432,11 +339,8 @@ namespace MeGUI.core.gui
                 readerWriterLock.AcquireReaderLock(Timeout.Infinite);
                 try
                 {
-                    IVideoReader reader = VideoReader;
-
-                    if (reader == null) return 0;
-
-                    return reader.FrameCount;
+                    IVideoReader reader = videoReader;
+                    return reader?.FrameCount ?? 0;
                 }
                 finally
                 {
@@ -445,84 +349,55 @@ namespace MeGUI.core.gui
             }
         }
 
-        private Padding cropMargin;
         public Padding CropMargin
         {
-            get
-            {
-                return cropMargin;
-            }
+            get => cropMargin;
             set
             {
                 cropMargin = value;
-                UpdateVideo();
+                Invalidate();
             }
         }
 
-        private bool displayActualFramerate;
-        //if set the actual framerate of the video playback will be displayed
-        //in the top left corner of the video frame
         public bool DisplayActualFramerate
         {
-            get { return displayActualFramerate; }
-            set { displayActualFramerate = value; UpdateVideo(); }
+            get => displayActualFramerate;
+            set
+            {
+                displayActualFramerate = value;
+                Invalidate();
+            }
         }
 
-        private bool ensureCorrectPlaybackSpeed;
-        //if set frames will be dropped to ensure a more correct playing speed
         public bool EnsureCorrectPlaybackSpeed
         {
-            get { return ensureCorrectPlaybackSpeed; }
-            set { ensureCorrectPlaybackSpeed = value; }
+            get => ensureCorrectPlaybackSpeed;
+            set => ensureCorrectPlaybackSpeed = value;
         }
 
-        private double speedUp = 1d;
-        //Set this to speed up or slow down the playback
         public double SpeedUp
         {
-            get { return speedUp; }
+            get => speedUp;
             set
             {
                 speedUp = value;
-
-                //Restart video to adjust playback speed for new speed up value
                 if (isPlaying) Play();
             }
         }
 
+        public double ActualFramerate => actualFramerate;
         #endregion
 
-        private bool initalized;
-        private Thread renderThread;
-
-        private double actualFramerate;
-        public double ActualFramerate
-        {
-            get
-            {
-                return actualFramerate;
-            }
-        }
-
-        /// <summary> 
-        /// Release Ressources.
-        /// </summary>
-        /// <param name="disposing">True, if managed ressources should be released; otherwise false.</param>
         protected override void Dispose(bool disposing)
         {
             Stop();
-
             playTimer.Dispose();
 
-            if (renderThread != null)
+            lock (frameLock)
             {
-                renderThread.Abort();
-                renderThread.Join();
+                currentFrame?.Dispose();
+                currentFrame = null;
             }
-
-            videoPreview.Image?.Dispose(); // get rid of bitmap
-            nextFrameEvent.Dispose();
-            renderEvent.Dispose();
 
             if (disposing && (components != null))
             {
@@ -530,6 +405,5 @@ namespace MeGUI.core.gui
             }
             base.Dispose(disposing);
         }
-
     }
 }

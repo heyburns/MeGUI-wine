@@ -1692,9 +1692,20 @@ namespace MeGUI
                 {
                     if (videoSourceFile == null)
                     {
-                        videoSourceFile = AvsFile.ParseScript(ScriptServer.GetInputLine(
-                            _file, null, false, PossibleSources.directShow, false, false, false, VideoInfo.FPS,
-                            false, NvDeinterlacerType.nvDeInterlacerNone, 0, 0, null, false), true);
+                        PossibleSources[] sources = new PossibleSources[] { PossibleSources.lsmash, PossibleSources.ffindex, PossibleSources.directShow };
+                        foreach (PossibleSources src in sources)
+                        {
+                            try
+                            {
+                                string script = ScriptServer.GetInputLine(
+                                    _file, null, false, src, false, false, false, VideoInfo.FPS,
+                                    false, NvDeinterlacerType.nvDeInterlacerNone, 0, 0, null, false);
+                                videoSourceFile = AvsFile.ParseScript(script, true);
+                                if (videoSourceFile != null)
+                                    break;
+                            }
+                            catch { }
+                        }
                         videoReader = null;
                     }
                     if (videoReader == null)

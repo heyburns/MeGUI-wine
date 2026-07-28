@@ -355,10 +355,10 @@ namespace MeGUI
                 
                 
                 _percentEstimated = _statusHistory.GetEstimatedProgress(_oTimeElapsed.Elapsed, out decimal dProgressPerTick);
-                if (_percentEstimated > 0)
+                if (_percentEstimated > 0 && dProgressPerTick > 0)
                 {
                     // estimate remaining time
-                    _timeRemaining = new TimeSpan((long)(((decimal)100 - _percentEstimated) * ((decimal)1 / dProgressPerTick)));
+                    _timeRemaining = new TimeSpan((long)(((decimal)100 - _percentEstimated) / dProgressPerTick));
                     
                     if (_frame.HasValue && _totalTime.HasValue)
                         _processingSpeedCurrent = Util.ToString(_totalTime.Value.Ticks / (100 / dProgressPerTick) * (decimal)_fps.Value, false) + " FPS";
@@ -368,7 +368,10 @@ namespace MeGUI
                         _processingSpeedCurrent = Util.ToString(dProgressPerTick * 600000000, false) + " PPM";
                 }
                 else
+                {
+                    _timeRemaining = TimeSpan.Zero;
                     _processingSpeedCurrent = _processingSpeedOverall;
+                }
             }
             catch (Exception)
             {
@@ -378,7 +381,7 @@ namespace MeGUI
 
     public class StatusHistory
     {
-        private static readonly TimeSpan _timeBetweenUpdates = new TimeSpan(0, 0, 5);
+        private static readonly TimeSpan _timeBetweenUpdates = new TimeSpan(0, 0, 1);
         private const int _historySize = 10;
 
         private TimeSpan _lastTime;
@@ -461,7 +464,9 @@ namespace MeGUI
 
         public decimal GetSpeedOverall()
         {
+            if (_lastTime.TotalMinutes > 0)
                 return _lastValue / (decimal)_lastTime.TotalMinutes;
-            }
+            return 0;
+        }
     }
 }

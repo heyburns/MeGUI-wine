@@ -33,6 +33,25 @@ namespace MeGUI
 	/// </summary>
 	public partial class QuantizerMatrixDialog : System.Windows.Forms.Form
 	{
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
 		private int[,] currentMatrix;
 		private int[,] I8x8, P8x8, I4x4L, I4x4CU, I4x4CY, P4x4L, P4x4CU, P4x4CY;
 		private int[,] jvtI8x8, jvtP8x8, jvtI4x4, jvtP4x4, flat8x8, flat4x4;
@@ -47,6 +66,9 @@ namespace MeGUI
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
 			currentMatrix = new int[16, 16];
 			jvtI4x4 = new int[,] {{6,13,20,28}, {13,20,28,32}, {20,28,32,37},
 					{28,32,37,42}};

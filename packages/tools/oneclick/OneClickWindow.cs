@@ -35,6 +35,25 @@ namespace MeGUI
 {
     public partial class OneClickWindow : Form
     {
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
         #region variable declaration
         LogItem _oLog;
         List<OneClickStreamControl> audioTracks;
@@ -122,6 +141,9 @@ namespace MeGUI
             }
             acceptableContainerTypes = MainForm.Instance.MuxProvider.GetSupportedContainers().ToArray();
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
 
             
             //add all container types

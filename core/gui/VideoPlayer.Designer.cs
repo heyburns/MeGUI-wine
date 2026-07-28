@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -204,6 +204,7 @@ namespace MeGUI
             // 
             // buttonPanel
             // 
+            this.buttonPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.buttonPanel.Controls.Add(this.positionSlider);
             this.buttonPanel.Controls.Add(this.btnFitScreen);
             this.buttonPanel.Controls.Add(this.btnReloadVideo);
@@ -375,7 +376,7 @@ namespace MeGUI
             // 
             // videoPanel
             // 
-            this.videoPanel.AutoScroll = true;
+            this.videoPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.videoPanel.Controls.Add(this.videoPreview);
             this.videoPanel.Location = new System.Drawing.Point(0, 0);
             this.videoPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -385,6 +386,7 @@ namespace MeGUI
             // 
             // videoPreview
             // 
+            this.videoPreview.Dock = System.Windows.Forms.DockStyle.Fill;
             this.videoPreview.CropMargin = new System.Windows.Forms.Padding(0);
             this.videoPreview.DisplayActualFramerate = false;
             this.videoPreview.EnsureCorrectPlaybackSpeed = false;
@@ -406,12 +408,13 @@ namespace MeGUI
             this.Controls.Add(this.videoPanel);
             this.Controls.Add(this.buttonPanel);
             this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Sizable;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MaximizeBox = false;
+            this.MaximizeBox = true;
             this.Name = "VideoPlayer";
             this.Text = "VideoPlayer";
+            this.WindowState = System.Windows.Forms.FormWindowState.Normal;
             this.Shown += new System.EventHandler(this.VideoPlayer_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.VideoPlayer_KeyDown);
             this.buttonPanel.ResumeLayout(false);

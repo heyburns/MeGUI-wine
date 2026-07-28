@@ -24,6 +24,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using MeGUI.core.util;
 
@@ -52,6 +53,8 @@ namespace MeGUI
         private int scriptRefresh = 1; // >= 1 enabled; < 1 disabled
         private bool bAllowUpsizing;
         private LogItem _oLog;
+        private bool isGeneratingScript = false;
+        private bool isScriptManuallyEdited = false;
 		#endregion
 
 		#region construction/deconstruction
@@ -61,6 +64,8 @@ namespace MeGUI
             eventsOn = false;
             this.mainForm = mainForm;
 			InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            this.avisynthScript.TextChanged += new System.EventHandler(this.avisynthScript_TextChanged);
 
             lblAspectError.Size = new System.Drawing.Size(MainForm.Instance.Settings.DPIRescale(75), MainForm.Instance.Settings.DPIRescale(21));
 
@@ -180,6 +185,8 @@ namespace MeGUI
 
 		protected override void OnClosing(CancelEventArgs e)
 		{
+            if (this.WindowState == FormWindowState.Normal && this.Location.X > 10 && this.Location.Y > 10)
+                MainForm.Instance.Settings.AviSynthWindowLocation = this.Location;
             player?.Close();
             detector?.Stop();
             detector = null;
@@ -188,6 +195,27 @@ namespace MeGUI
             reader = null;
             base.OnClosing (e);
 		}
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            Point saved = MainForm.Instance.Settings.AviSynthWindowLocation;
+            if (saved.X > 10 && saved.Y > 10)
+            {
+                this.Location = saved;
+            }
+            else
+            {
+                Form owner = this.Owner ?? MainForm.Instance;
+                if (owner != null)
+                {
+                    this.Location = new Point(
+                        owner.Location.X + (owner.Width - this.Width) / 2,
+                        owner.Location.Y + (owner.Height - this.Height) / 2
+                    );
+                }
+            }
+        }
 		#endregion
 
         #region buttons
@@ -217,7 +245,10 @@ namespace MeGUI
             // If the player is null, create a new one.
             // Otherwise use the existing player to load the latest preview.
             if (player == null || player.IsDisposed) 
+            {
                 player = new VideoPlayer();
+                player.Owner = this;
+            }
 
 			if (player.LoadVideo(avisynthScript.Text, PREVIEWTYPE.REGULAR, false, true, player.CurrentFrame, true))
 			{
@@ -278,12 +309,14 @@ namespace MeGUI
                     iWidth = (int)file.VideoInfo.Width;
                     iHeight = (int)file.VideoInfo.Height;
                 }
-                resizeLine = ScriptServer.GetResizeLine(resize.Checked, (int)horizontalResolution.Value, (int)verticalResolution.Value, 0, 0, (ResizeFilterType)(resizeFilterType.SelectedItem as EnumProxy).RealValue,
+                ResizeFilterType selectedResizeFilter = (resizeFilterType.SelectedItem as EnumProxy)?.RealValue is ResizeFilterType r ? r : ResizeFilterType.Lanczos;
+                resizeLine = ScriptServer.GetResizeLine(resize.Checked, (int)horizontalResolution.Value, (int)verticalResolution.Value, 0, 0, selectedResizeFilter,
                                                         crop.Checked, Cropping, iWidth, iHeight);
             }
 
             // denoise
-            denoiseLines = ScriptServer.GetDenoiseLines(noiseFilter.Checked, (DenoiseFilterType)(noiseFilterType.SelectedItem as EnumProxy).RealValue);
+            DenoiseFilterType selectedDenoiseFilter = (noiseFilterType.SelectedItem as EnumProxy)?.RealValue is DenoiseFilterType d ? d : DenoiseFilterType.MinimalNoise;
+            denoiseLines = ScriptServer.GetDenoiseLines(noiseFilter.Checked, selectedDenoiseFilter);
 
             // final script
             string newScript = ScriptServer.CreateScriptFromTemplate(GetProfileSettings().Template, inputLine, cropLine, resizeLine, denoiseLines, deinterlaceLines);
@@ -320,7 +353,7 @@ namespace MeGUI
             if (_tempInputFileName != this.input.Filename || _tempInputIndexFile != this.indexFile || _tempDeinterlacer != deinterlace.Checked || _tempResize != resize.Checked ||
                 _tempInputSourceType != sourceType || _tempColourCorrect != colourCorrect.Checked || _tempMpeg2Deblocking != mpeg2Deblocking.Checked ||
                 _tempFlipVertical != flipVertical.Checked || _tempFPS != (double)fpsBox.Value || _tempDSS2 != dss2.Checked || _tempNvDeint != nvDeInt.Checked ||
-                _tempNvDeintType != (NvDeinterlacerType)(cbNvDeInt.SelectedItem as EnumProxy).RealValue || _tempNvResize != nvResize.Checked ||  _tempCrop != crop.Checked ||
+                _tempNvDeintType != ((cbNvDeInt.SelectedItem as EnumProxy)?.RealValue is NvDeinterlacerType nvD ? nvD : NvDeinterlacerType.nvDeInterlacerNone) || _tempNvResize != nvResize.Checked ||  _tempCrop != crop.Checked ||
                 (nvResize.Checked && resize.Checked && (_tempNvHorizontalResolution != horizontalResolution.Value || _tempNvVerticalResolution != verticalResolution.Value)) ||
                 (nvResize.Checked && crop.Checked && _tempCropValues != Cropping || _tempTimecodesv2 != chTimecodesv2.Checked))
             {
@@ -334,7 +367,7 @@ namespace MeGUI
                 _tempFPS = (double)fpsBox.Value;
                 _tempDSS2 = dss2.Checked;
                 _tempNvDeint = nvDeInt.Checked;
-                _tempNvDeintType = (NvDeinterlacerType)(cbNvDeInt.SelectedItem as EnumProxy).RealValue;
+                _tempNvDeintType = (cbNvDeInt.SelectedItem as EnumProxy)?.RealValue is NvDeinterlacerType nvD2 ? nvD2 : NvDeinterlacerType.nvDeInterlacerNone;
                 _tempResize = resize.Checked;
                 _tempNvResize = nvResize.Checked;
                 _tempNvHorizontalResolution = horizontalResolution.Value;
@@ -373,12 +406,20 @@ namespace MeGUI
 		private void ShowScript(bool bForce)
 		{
             if (bForce)
+            {
                 scriptRefresh++;
+                isScriptManuallyEdited = false;
+            }
             if (scriptRefresh < 1)
                 return;
 
+            if (isScriptManuallyEdited)
+                return;
+
             string oldScript = avisynthScript.Text;
+            isGeneratingScript = true;
             avisynthScript.Text = this.GenerateScript();
+            isGeneratingScript = false;
             if (!oldScript.Equals(avisynthScript.Text))
                 chAutoPreview_CheckedChanged(null, null);
 		}
@@ -902,7 +943,10 @@ namespace MeGUI
         {
             int iCurrentFrame = -1;
             if (player == null || player.IsDisposed)
+            {
                 player = new VideoPlayer();
+                player.Owner = this;
+            }
             else
                 iCurrentFrame = player.CurrentFrame;
             this.isPreviewMode = false;
@@ -1462,7 +1506,7 @@ namespace MeGUI
         }
 
         private void UpdateEverything(bool bShowScript, bool bForceScript, bool bResizeEnabled)
-{
+        {
             if (!eventsOn)
                 return;
             eventsOn = false;
@@ -1676,6 +1720,14 @@ namespace MeGUI
                 UpdateEverything(sender != null, false, true);
             else
                 UpdateEverything(sender != null, false, false);
+        }
+
+        private void avisynthScript_TextChanged(object sender, EventArgs e)
+        {
+            if (!isGeneratingScript)
+            {
+                isScriptManuallyEdited = true;
+            }
         }
     }
     public delegate void OpenScriptCallback(string avisynthScript, MediaInfoFile oInfo);

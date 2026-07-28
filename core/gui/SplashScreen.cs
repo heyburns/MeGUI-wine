@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2023 Doom9 & al
 // 
@@ -18,15 +18,31 @@
 // 
 // ****************************************************************************
 
+using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace MeGUI.core.gui
 {
     public partial class SplashScreen : Form
     {
+        private Image splashImage;
+
         public SplashScreen()
         {
             InitializeComponent();
+            this.splashImage = this.BackgroundImage;
+            this.BackgroundImage = null;
+            this.DoubleBuffered = true;
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (this.splashImage != null)
+            {
+                e.Graphics.DrawImage(this.splashImage, new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height));
+            }
         }
     }
 }

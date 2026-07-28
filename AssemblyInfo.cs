@@ -26,10 +26,10 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("MeGUI")]
-[assembly: AssemblyDescription("GUI frontend for video encoding")]
+[assembly: AssemblyTitle("MeGUI-wine")]
+[assembly: AssemblyDescription("GUI frontend for video encoding (Wine/Proton Edition)")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyProduct("MeGUI")]
+[assembly: AssemblyProduct("MeGUI-wine")]
 [assembly: AssemblyCompany("http://sourceforge.net/projects/megui")]
 [assembly: AssemblyCopyright("Licensed under the GPL")]
 [assembly: AssemblyTrademark("")]
@@ -46,8 +46,8 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("6.6.6.6")]
-[assembly: AssemblyFileVersion("6.6.6.6")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
 //
 // In order to sign your assembly you must specify a key to use. Refer to the 

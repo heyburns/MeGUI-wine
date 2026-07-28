@@ -1,3 +1,4 @@
+using System.Drawing;
 // ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
@@ -36,6 +37,25 @@ namespace MeGUI
 	/// </summary>
 	public partial class AutoEncodeWindow : System.Windows.Forms.Form
 	{
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            if (this.Owner != null)
+            {
+                this.Location = new Point(
+                    this.Owner.Location.X + (this.Owner.Width - this.Width) / 2,
+                    this.Owner.Location.Y + (this.Owner.Height - this.Height) / 2
+                );
+            }
+            else if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+            {
+                this.Location = new Point(
+                    MainForm.Instance.Location.X + (MainForm.Instance.Width - this.Width) / 2,
+                    MainForm.Instance.Location.Y + (MainForm.Instance.Height - this.Height) / 2
+                );
+            }
+        }
+
 		#region variables
         private List<AudioJob> audioStreams;
         private bool prerender;
@@ -47,6 +67,9 @@ namespace MeGUI
         public AutoEncodeWindow()
 		{
             InitializeComponent();
+            this.StartPosition = FormStartPosition.Manual;
+            if (MainForm.Instance != null && (object)this != (object)MainForm.Instance)
+                this.Owner = MainForm.Instance;
         }
         public AutoEncodeWindow(VideoStream videoStream, List<AudioJob> audioStreams, bool prerender, VideoInfo vInfo) : this()
         {

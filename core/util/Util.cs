@@ -84,9 +84,9 @@ namespace MeGUI.core.util
 
         public static void ThreadSafeRun(Control c, MethodInvoker m)
         {
-            if (c != null && c.InvokeRequired)
+            if (c != null && c.IsHandleCreated && c.InvokeRequired)
                 c.Invoke(m);
-            else
+            else if (c != null && !c.IsDisposed)
                 m();
         }
 

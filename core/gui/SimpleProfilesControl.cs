@@ -41,7 +41,7 @@ namespace MeGUI.core.gui
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Profile SelectedProfile
         {
-            get { return ((Named<Profile>)comboBox1.SelectedItem).Data; }
+            get { return (comboBox1.SelectedItem as Named<Profile>)?.Data; }
         }
 
         public void SelectProfile(Profile prof)
@@ -56,6 +56,7 @@ namespace MeGUI.core.gui
                 if (n.Data.FQName == fqname)
                 {
                     comboBox1.SelectedItem = n;
+                    lastSelectedProfileFQName = fqname;
                     return;
                 }
             }
@@ -65,12 +66,14 @@ namespace MeGUI.core.gui
                 if (n.Data.FQName == fqname)
                 {
                     comboBox1.SelectedItem = n;
+                    lastSelectedProfileFQName = fqname;
                     return;
                 }
             }
             if (comboBox1.Items.Count > 0)
             {
                 comboBox1.SelectedIndex = 0;
+                lastSelectedProfileFQName = ((Named<Profile>)comboBox1.SelectedItem).Data.FQName;
                 MessageBox.Show("The profile \"" + fqname + "\" could not be selected.\r\nSelecting profile \"" + comboBox1.SelectedItem.ToString() + "\" instead.", "Profile couldn't be selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
@@ -95,6 +98,7 @@ namespace MeGUI.core.gui
         }
 
         private ProfileManager manager = new ProfileManager("");
+        private string lastSelectedProfileFQName = null;
 
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ProfileManager Manager
@@ -178,10 +182,20 @@ namespace MeGUI.core.gui
         }
 
         public event EventHandler SelectedProfileChanged;
+
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            Profile selected = SelectedProfile;
+            if (selected == null)
+                return; // Ignore temporary/spurious null selections during layout/enabling/clearing.
+
+            if (selected.FQName == lastSelectedProfileFQName)
+                return; // Selection didn't actually change! Ignore spurious Wine event.
+
+            lastSelectedProfileFQName = selected.FQName;
+
             if (bUpdateSelectedProfile)
-                Manager.SetSelectedProfile(SelectedProfile);
+                Manager.SetSelectedProfile(selected);
             raiseProfileChangedEvent();
         }
     }

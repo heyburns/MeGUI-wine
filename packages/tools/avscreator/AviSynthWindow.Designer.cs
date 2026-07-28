@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -315,8 +315,8 @@ namespace MeGUI
             // resize
             // 
             this.resize.AutoSize = true;
-            this.resize.Checked = true;
-            this.resize.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.resize.Checked = false;
+            this.resize.CheckState = System.Windows.Forms.CheckState.Unchecked;
             this.resize.Location = new System.Drawing.Point(11, 121);
             this.resize.Name = "resize";
             this.resize.Size = new System.Drawing.Size(57, 17);

@@ -189,7 +189,7 @@ namespace MeGUI.packages.audio.naac
                 if (rbtnVBR.Checked) nas.BitrateMode = BitrateManagementMode.VBR;
                 nas.Bitrate = vBitrate.Value;
                 nas.Quality= (Decimal)vQuality.Value/vQuality.Maximum;
-                nas.Profile = (AacProfile)(comboBox1.SelectedItem as EnumProxy).RealValue;
+                nas.Profile = (comboBox1.SelectedItem as EnumProxy)?.RealValue is AacProfile p ? p : AacProfile.Auto;
 				return nas;
 			}
 			set

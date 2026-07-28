@@ -45,15 +45,16 @@ namespace MeGUI.packages.audio.qaac
             get
             {
                 QaacSettings qas = new QaacSettings();
-                switch ((QaacMode)(cbMode.SelectedItem as EnumProxy).RealValue)
+                QaacMode selectedMode = (cbMode.SelectedItem as EnumProxy)?.RealValue is QaacMode m ? m : QaacMode.TVBR;
+                switch (selectedMode)
                 {
                     case QaacMode.ABR: qas.BitrateMode = BitrateManagementMode.ABR; break;
                     case QaacMode.CBR: qas.BitrateMode = BitrateManagementMode.CBR; break;
                     default: qas.BitrateMode = BitrateManagementMode.VBR; break;
                 }
                 qas.NoDelay = chNoDelay.Checked;
-                qas.Mode = (QaacMode)(cbMode.SelectedItem as EnumProxy).RealValue;
-                qas.Profile = (QaacProfile)(cbProfile.SelectedItem as EnumProxy).RealValue;
+                qas.Mode = selectedMode;
+                qas.Profile = (cbProfile.SelectedItem as EnumProxy)?.RealValue is QaacProfile p ? p : QaacProfile.LC;
                 qas.Quality = Int16.Parse(cbQuality.SelectedItem.ToString());
                 qas.Bitrate = (int)trackBar.Value;
                 return qas;
@@ -104,6 +105,7 @@ namespace MeGUI.packages.audio.qaac
 
         private void trackBar1_ValueChanged(object sender, EventArgs e)
         {
+            if (cbMode.SelectedItem as EnumProxy == null) return;
             switch ((QaacMode)(cbMode.SelectedItem as EnumProxy).RealValue)
             {
                 case QaacMode.TVBR:
@@ -129,9 +131,12 @@ namespace MeGUI.packages.audio.qaac
             }  
             if (cbProfile.SelectedItem != null)
             {
-                if (((QaacProfile)(cbProfile.SelectedItem as EnumProxy).RealValue) == QaacProfile.ALAC)
-                    encoderGroupBox.Text = String.Format(" QAAC Options ");
-                chNoDelay.Visible = (((QaacProfile)(cbProfile.SelectedItem as EnumProxy).RealValue) == QaacProfile.LC);
+                if (cbProfile.SelectedItem as EnumProxy != null)
+                {
+                    if (((QaacProfile)(cbProfile.SelectedItem as EnumProxy).RealValue) == QaacProfile.ALAC)
+                        encoderGroupBox.Text = String.Format(" QAAC Options ");
+                    chNoDelay.Visible = (((QaacProfile)(cbProfile.SelectedItem as EnumProxy).RealValue) == QaacProfile.LC);
+                }
             }
         }
 
@@ -150,6 +155,7 @@ namespace MeGUI.packages.audio.qaac
 
             if (cbProfile.SelectedIndex == 1)
             {
+                if (cbMode.SelectedItem as EnumProxy == null) return;
                 QaacMode qMode = (QaacMode)(cbMode.SelectedItem as EnumProxy).RealValue;
                 cbMode.Items.Remove(EnumProxy.Create(QaacMode.TVBR));
                 if (qMode == QaacMode.TVBR)

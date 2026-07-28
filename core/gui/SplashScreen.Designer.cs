@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2023 Doom9 & al
 // 
@@ -70,7 +70,6 @@ namespace MeGUI.core.gui
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SplashScreen";
-            this.TransparencyKey = System.Drawing.Color.White;
             this.ResumeLayout(false);
 
         }
