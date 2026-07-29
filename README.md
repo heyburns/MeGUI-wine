@@ -1,41 +1,15 @@
-[![GitHub version](https://img.shields.io/github/v/release/Kurtnoise-zeus/megui)](https://github.com/Kurtnoise-zeus/megui/)
-![MeGUI number of downloads](https://img.shields.io/github/downloads/kurtnoise-zeus/megui/latest/total.svg)
-[![download latest release](https://img.shields.io/badge/Megui-download-green?style=flat)](https://github.com/Kurtnoise-zeus/megui/releases/latest) 
+# MeGUI Linux and Wine Compatibility Fork
 
+This is a customized fork of MeGUI focused on fixing UI bugs, scaling issues, and playback stability when running under Wine or Proton on Linux. For general information about MeGUI, visit the official project page at https://sourceforge.net/projects/megui/ or the upstream repository at https://github.com/Kurtnoise-zeus/megui.
 
-# MeGUI 6666 version
+## What Has Been Enhanced in This Version
 
-During summer 2022, I upgraded the [current megui codebase](https://sourceforge.net/p/megui/code/HEAD/tree/megui/trunk/) in order to fix some issues and add some new features. 
+- Fixed video preview window collapsing and freeze bugs under Wine and Proton
+- Restored smooth asynchronous frame seeking in the video player without freezing the user interface
+- Fixed aspect ratio calculation and dynamic window resizing when maximizing or zooming the preview window
+- Updated real-time encoding progress calculations and log output tracking
+- Integrated updated MediaInfo libraries for improved media indexing under Linux Wine prefixes
 
-The current branch has been **tested only on x64 dev environment** (Avisynth+, Windows 11 Pro Edition).
+## Building
 
-
-## Compilation
-
-Just open the MeGUI.sln file using Visual Studio and restaure NuGet missing packages. Currently, I'm using VS2026 Community Edition in order to compile the latest changes. The previous one (VS 2022) works fine also.
-
-## What's new
-
-Nothing really new comparing to the official release except :
-
-- Audio transcoding in order to use channel mask values. This requires avisynth+ 3.7.3 or higher.
-- Demuxers tool, mainly for mkv/webm/mp4/mov/ts/m2ts
-- Exhale Audio Encoder (https://gitlab.com/ecodis/exhale)
-- FFmpeg DCA/EAC3/THD Audio Encoders (https://ffmpeg.org/)
-- BestSource avisynth support (https://github.com/vapoursynth/bestsource/releases)
-- FFV1 Lossless Video Encoder (https://ffmpeg.org/)
-- SVT-AV1-Essential Video Encoder (https://github.com/nekotrix/SVT-AV1-Essential) 
-
-## Release
-
-From time to time, I upload directly on [github Release page](https://github.com/Kurtnoise-zeus/megui/releases) a package having latest changes and/or fixes. Use it at your own risk.
-
-## Todo
-
-- [ ] Add VVC Video Encoder (dunno which one yet)
-- [ ] Add Bitrate Video Viewer
-- [ ] ...
-
-## Repository Activity
-
-![Repository Activities](https://repobeats.axiom.co/api/embed/c013ca5965300e42e4021ac7fb736d5b5cc9ed58.svg "Repobeats analytics image")
+Open MeGUI.sln in Visual Studio or compile under Wine using MSBuild to build the project binary.
