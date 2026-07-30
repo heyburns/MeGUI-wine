@@ -1,6 +1,6 @@
 # MeGUI Linux and Wine Compatibility Fork
 
-This is a customized fork of MeGUI focused on fixing UI bugs, scaling issues, and playback stability when running under Wine or Proton on Linux. For general information about MeGUI, visit the official project page at https://sourceforge.net/projects/megui/ or the upstream repository at https://github.com/Kurtnoise-zeus/megui.
+This is a customized fork of MeGUI focused on patches and bugfixes to improve stability when running under Wine on Linux. Tested in a Wayland environment. For general information about MeGUI, visit the official project page at https://sourceforge.net/projects/megui/ or the upstream repository at https://github.com/Kurtnoise-zeus/megui.
 
 ## What Has Been Enhanced in This Version
 
@@ -34,9 +34,6 @@ Download and extract the latest MeGUI release zip into your desired folder, then
 
 WINEPREFIX=~/.local/share/wineprefixes/megui wine /path/to/extracted/MeGUI.exe
 
-## Building
-
-Open MeGUI.sln in Visual Studio or compile under Wine using MSBuild to build the project binary.
 
 ## License
 
