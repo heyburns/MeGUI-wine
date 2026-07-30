@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<GenericProfileOfOneClickSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Doctor Who BD Episodes</Name>
+  <Settings>
+    <VideoProfileName>x265: *scratchpad*</VideoProfileName>
+    <AvsProfileName>AviSynth: Doctor Who BD Episodes</AvsProfileName>
+    <PrerenderVideo>false</PrerenderVideo>
+    <AudioProfileName>migrated</AudioProfileName>
+    <AudioEncodingModeString>migrated</AudioEncodingModeString>
+    <AudioSettingsString>
+      <OneClickAudioSettings>
+        <AudioEncodingModeString>IfCodecDoesNotMatch</AudioEncodingModeString>
+        <Language>[default]</Language>
+        <Profile>QAAC: *scratchpad*</Profile>
+        <UseFirstTrackOnly>false</UseFirstTrackOnly>
+      </OneClickAudioSettings>
+    </AudioSettingsString>
+    <DontEncodeVideo>false</DontEncodeVideo>
+    <AutomaticDeinterlacing>false</AutomaticDeinterlacing>
+    <DAR>
+      <AR>1.3333333333333333333333333333</AR>
+      <X>4</X>
+      <Y>3</Y>
+    </DAR>
+    <AutoCrop>true</AutoCrop>
+    <KeepInputResolution>true</KeepInputResolution>
+    <OutputResolution>1920</OutputResolution>
+    <Filesize xsi:nil="true" />
+    <SplitSize xsi:nil="true" />
+    <ContainerCandidates>
+      <string>MKV</string>
+    </ContainerCandidates>
+    <LeadingName />
+    <SuffixName />
+    <WorkingNameReplace />
+    <WorkingNameReplaceWith />
+    <UseChaptersMarks>true</UseChaptersMarks>
+    <UseNoLanguagesAsFallback>false</UseNoLanguagesAsFallback>
+    <DisableIntermediateMKV>false</DisableIntermediateMKV>
+    <DefaultWorkingDirectory>D:\Temp</DefaultWorkingDirectory>
+    <DefaultOutputDirectory>G:\Output</DefaultOutputDirectory>
+    <DefaultAudioLanguageString>
+      <string>English</string>
+    </DefaultAudioLanguageString>
+    <DefaultSubtitleLanguageString>
+      <string>English</string>
+    </DefaultSubtitleLanguageString>
+    <IndexerPriorityString>
+      <string>LSMASH</string>
+      <string>DGI</string>
+      <string>DGM</string>
+      <string>D2V</string>
+      <string>FFMS</string>
+      <string>AVISOURCE</string>
+    </IndexerPriorityString>
+  </Settings>
+</GenericProfileOfOneClickSettings>

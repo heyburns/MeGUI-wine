@@ -1,8 +1,9 @@
 bin/
 obj/
+tools/
 *.user
 *.suo
 *.cache
 *.log
-*.png
 adjust_size_debug.txt
+test_frame*.png

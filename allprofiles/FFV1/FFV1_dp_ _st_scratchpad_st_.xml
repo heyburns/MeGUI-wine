@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<GenericProfileOfffv1Settings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>*scratchpad*</Name>
+  <Settings>
+    <VideoEncodingType>CBR</VideoEncodingType>
+    <FFV1EncodingType>none</FFV1EncodingType>
+    <BitrateQuantizer>0</BitrateQuantizer>
+    <KeyframeInterval>0</KeyframeInterval>
+    <NbBframes>0</NbBframes>
+    <MinQuantizer>0</MinQuantizer>
+    <MaxQuantizer>0</MaxQuantizer>
+    <V4MV>false</V4MV>
+    <QPel>false</QPel>
+    <Trellis>false</Trellis>
+    <CreditsQuantizer>0</CreditsQuantizer>
+    <Logfile>.stats</Logfile>
+    <VideoName />
+    <CustomEncoderOptions />
+    <MaxNumberOfPasses>2</MaxNumberOfPasses>
+    <NbThreads>1</NbThreads>
+    <Context>1</Context>
+    <GOPSize>1</GOPSize>
+    <NBThreads>1</NBThreads>
+    <Slices>1</Slices>
+    <ErrorCorrection>true</ErrorCorrection>
+    <FFV110Bits>false</FFV110Bits>
+  </Settings>
+</GenericProfileOfffv1Settings>

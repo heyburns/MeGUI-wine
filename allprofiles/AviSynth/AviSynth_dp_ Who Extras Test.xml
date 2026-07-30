@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<GenericProfileOfAviSynthSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Who Extras Test</Name>
+  <Settings>
+    <Mod16Method>none</Mod16Method>
+    <ModValue>mod8</ModValue>
+    <Resize>true</Resize>
+    <NvResize>false</NvResize>
+    <Upsize>false</Upsize>
+    <Template>&lt;input&gt;
+&lt;crop&gt;
+&lt;resize&gt;
+# 1) Store the original width/height if you want to return to these later
+orig_width  = Width
+orig_height = Height
+# 2) Remove black borders so the ratio calculation is correct
+RoboCrop()
+# 3) Force DAR to whichever standard TV ratio is closer
+r    = Float(Width) / Float(Height)
+r43  = 4.0 / 3.0   # ~1.3333
+r169 = 16.0 / 9.0  # ~1.7777
+d43  = Abs(r - r43)
+d169 = Abs(r - r169)
+global MeGUI_darx = (d169 &lt;= d43) ? 16 : 4
+global MeGUI_dary = (d169 &lt;= d43) ?  9 : 3
+# 4) Deinterlace / upscale / etc.
+NNEDI3(field=-1)
+# 5) Resize back to the *original* stored resolution
+LanczosResize(orig_width, orig_height)
+# 6) Apply your filters
+TemporalDegrain2_fast()
+LSFMod()
+# 7) Prefetch for multithreading
+Prefetch(12)
+</Template>
+    <ResizeMethod>Lanczos</ResizeMethod>
+    <DenoiseMethod>MinimalNoise</DenoiseMethod>
+    <PreferAnimeDeinterlace>false</PreferAnimeDeinterlace>
+    <Denoise>false</Denoise>
+    <MPEG2Deblock>false</MPEG2Deblock>
+    <ColourCorrect>true</ColourCorrect>
+    <DSS2>false</DSS2>
+    <AcceptableAspectError>1</AcceptableAspectError>
+  </Settings>
+</GenericProfileOfAviSynthSettings>

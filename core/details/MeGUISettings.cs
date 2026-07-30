@@ -129,7 +129,7 @@ namespace MeGUI
             updateCheckInterval = 240;
             acceptableFPSError = 0.01M;
             autoUpdateServerSubList = 0;
-            autoUpdate = true;
+            autoUpdate = false;
             dialogSettings = new DialogSettings();
             sdSettings = new SourceDetectorSettings();
             AedSettings = new AutoEncodeDefaultsSettings();

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<GenericProfileOfxvidSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>*scratchpad*</Name>
+  <Settings>
+    <VideoEncodingType>CBR</VideoEncodingType>
+    <FFV1EncodingType>none</FFV1EncodingType>
+    <BitrateQuantizer>700</BitrateQuantizer>
+    <KeyframeInterval>300</KeyframeInterval>
+    <NbBframes>2</NbBframes>
+    <MinQuantizer>2</MinQuantizer>
+    <MaxQuantizer>31</MaxQuantizer>
+    <V4MV>false</V4MV>
+    <QPel>false</QPel>
+    <Trellis>true</Trellis>
+    <CreditsQuantizer>20</CreditsQuantizer>
+    <Logfile>.stats</Logfile>
+    <VideoName />
+    <CustomEncoderOptions />
+    <MaxNumberOfPasses>2</MaxNumberOfPasses>
+    <NbThreads>0</NbThreads>
+    <Quantizer>0</Quantizer>
+    <Turbo>true</Turbo>
+    <MotionSearchPrecision>6</MotionSearchPrecision>
+    <VHQMode>1</VHQMode>
+    <MinPQuant>2</MinPQuant>
+    <MaxPQuant>31</MaxPQuant>
+    <MinBQuant>2</MinBQuant>
+    <MaxBQuant>31</MaxBQuant>
+    <BQuantRatio>150</BQuantRatio>
+    <BQuantOffset>100</BQuantOffset>
+    <KeyFrameBoost>10</KeyFrameBoost>
+    <KeyframeThreshold>1</KeyframeThreshold>
+    <KeyframeReduction>20</KeyframeReduction>
+    <OverflowControlStrength>5</OverflowControlStrength>
+    <MaxOverflowImprovement>5</MaxOverflowImprovement>
+    <MaxOverflowDegradation>5</MaxOverflowDegradation>
+    <HighBitrateDegradation>0</HighBitrateDegradation>
+    <LowBitrateImprovement>0</LowBitrateImprovement>
+    <ReactionDelayFactor>16</ReactionDelayFactor>
+    <AveragingPeriod>100</AveragingPeriod>
+    <FrameDropRatio>0</FrameDropRatio>
+    <RateControlBuffer>100</RateControlBuffer>
+    <XvidProfile>0</XvidProfile>
+    <VbvPeakRate>0</VbvPeakRate>
+    <VbvMaxRate>0</VbvMaxRate>
+    <VbvBuffer>0</VbvBuffer>
+    <PackedBitstream>true</PackedBitstream>
+    <GMC>false</GMC>
+    <ChromaMotion>true</ChromaMotion>
+    <ClosedGOP>true</ClosedGOP>
+    <VHQForBframes>false</VHQForBframes>
+    <Interlaced>false</Interlaced>
+    <BottomFieldFirst>true</BottomFieldFirst>
+    <BframeThreshold>0</BframeThreshold>
+    <QuantizerMatrix />
+    <HVSMasking>0</HVSMasking>
+  </Settings>
+</GenericProfileOfxvidSettings>

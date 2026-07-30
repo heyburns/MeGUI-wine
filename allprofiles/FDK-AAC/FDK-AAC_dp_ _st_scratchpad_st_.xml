@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<GenericProfileOfFDKAACSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>*scratchpad*</Name>
+  <Settings>
+    <PreferredDecoderString>LWLibavAudioSource</PreferredDecoderString>
+    <DownmixMode>KeepOriginal</DownmixMode>
+    <BitrateMode>CBR</BitrateMode>
+    <Bitrate>128</Bitrate>
+    <AutoGain>false</AutoGain>
+    <SampleRateType>deprecated</SampleRateType>
+    <SampleRate>KeepOriginal</SampleRate>
+    <TimeModification>KeepOriginal</TimeModification>
+    <ApplyDRC>false</ApplyDRC>
+    <Normalize>100</Normalize>
+    <CustomEncoderOptions />
+    <Profile>M4LC</Profile>
+    <Mode>CBR</Mode>
+    <Quality>3</Quality>
+  </Settings>
+</GenericProfileOfFDKAACSettings>

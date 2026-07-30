@@ -213,6 +213,12 @@
     <Content Include="lib_x86\MediaInfo.dll" Condition=" '$(Platform)' == 'x86' ">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="lib_x64\AvisynthWrapper.dll" Condition=" '$(Platform)' == 'x64' ">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lib_x86\AvisynthWrapper.dll" Condition=" '$(Platform)' == 'x86' ">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="core\details\AudioTrackInfo.cs" />
     <Compile Include="core\details\CleanupJob.cs" />
     <Compile Include="core\details\CodecManager.cs" />

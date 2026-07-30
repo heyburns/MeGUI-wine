@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<ArrayOfArrayOfString xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ArrayOfString>
+    <string>FFV1</string>
+    <string>svtav1</string>
+    <string>x264</string>
+    <string>x265</string>
+    <string>XviD</string>
+    <string>FFmpeg AC-3</string>
+    <string>FFmpeg DTS</string>
+    <string>FFmpeg EAC-3</string>
+    <string>FFmpeg TrueHD</string>
+    <string>FFmpeg MP2</string>
+    <string>LAME MP3</string>
+    <string>Nero AAC</string>
+    <string>Vorbis</string>
+    <string>Flac</string>
+    <string>QAAC</string>
+    <string>OPUS</string>
+    <string>FDK-AAC</string>
+    <string>FFmpeg AAC</string>
+    <string>Exhale</string>
+    <string>OneClick</string>
+    <string>AviSynth</string>
+  </ArrayOfString>
+  <ArrayOfString>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>*scratchpad*</string>
+    <string>Six Million Dollar Man</string>
+    <string>*scratchpad*</string>
+  </ArrayOfString>
+  <ArrayOfString>
+    <string>Video</string>
+    <string>Audio</string>
+  </ArrayOfString>
+  <ArrayOfString>
+    <string>x265</string>
+    <string>QAAC</string>
+  </ArrayOfString>
+</ArrayOfArrayOfString>

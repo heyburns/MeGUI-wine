@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<GenericProfileOfOpusSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>*scratchpad*</Name>
+  <Settings>
+    <PreferredDecoderString>LWLibavAudioSource</PreferredDecoderString>
+    <DownmixMode>KeepOriginal</DownmixMode>
+    <BitrateMode>VBR</BitrateMode>
+    <Bitrate>96</Bitrate>
+    <AutoGain>false</AutoGain>
+    <SampleRateType>deprecated</SampleRateType>
+    <SampleRate>KeepOriginal</SampleRate>
+    <TimeModification>KeepOriginal</TimeModification>
+    <ApplyDRC>false</ApplyDRC>
+    <Normalize>100</Normalize>
+    <CustomEncoderOptions />
+    <Mode>VBR</Mode>
+  </Settings>
+</GenericProfileOfOpusSettings>

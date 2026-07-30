@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<GenericProfileOfAviSynthSettings xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Sarah Jane Adventures</Name>
+  <Settings>
+    <Mod16Method>none</Mod16Method>
+    <ModValue>mod8</ModValue>
+    <Resize>true</Resize>
+    <NvResize>false</NvResize>
+    <Upsize>false</Upsize>
+    <Template>&lt;input&gt;
+&lt;deinterlace&gt;
+&lt;crop&gt;
+&lt;resize&gt;
+&lt;denoise&gt;
+orig_width  = Width
+orig_height = Height
+Robocrop()
+LanczosResize(orig_width, orig_height)
+LRemoveDust(17,4)
+ConvertBits(10)
+Prefetch(12)
+</Template>
+    <ResizeMethod>Lanczos</ResizeMethod>
+    <DenoiseMethod>MinimalNoise</DenoiseMethod>
+    <PreferAnimeDeinterlace>false</PreferAnimeDeinterlace>
+    <Denoise>false</Denoise>
+    <MPEG2Deblock>false</MPEG2Deblock>
+    <ColourCorrect>true</ColourCorrect>
+    <DSS2>false</DSS2>
+    <AcceptableAspectError>1</AcceptableAspectError>
+  </Settings>
+</GenericProfileOfAviSynthSettings>
