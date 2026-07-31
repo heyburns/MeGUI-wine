@@ -1035,35 +1035,52 @@ namespace MeGUI
         public static List<Process> GetChildProcesses(Process process)
         {
             List<Process> children = new List<Process>();
-            if (process == null || process.HasExited)
+            if (process == null)
                 return children;
 
             try
             {
-                uint parentId = (uint)process.Id;
+                int rootPid = process.Id;
+                HashSet<int> parentPids = new HashSet<int> { rootPid };
+
                 IntPtr hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
                 if (hSnapshot != IntPtr.Zero && hSnapshot != (IntPtr)(-1))
                 {
                     try
                     {
+                        List<PROCESSENTRY32> allEntries = new List<PROCESSENTRY32>();
                         PROCESSENTRY32 procEntry = new PROCESSENTRY32();
                         procEntry.dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32));
+
                         if (Process32First(hSnapshot, ref procEntry))
                         {
                             do
                             {
-                                if (procEntry.th32ParentProcessID == parentId && procEntry.th32ProcessID != parentId)
+                                allEntries.Add(procEntry);
+                            } while (Process32Next(hSnapshot, ref procEntry));
+                        }
+
+                        bool addedAny;
+                        do
+                        {
+                            addedAny = false;
+                            foreach (var entry in allEntries)
+                            {
+                                int childId = (int)entry.th32ProcessID;
+                                int parentId = (int)entry.th32ParentProcessID;
+
+                                if (parentPids.Contains(parentId) && !parentPids.Contains(childId) && childId != 0 && childId != rootPid)
                                 {
+                                    parentPids.Add(childId);
+                                    addedAny = true;
                                     try
                                     {
-                                        Process childProc = Process.GetProcessById((int)procEntry.th32ProcessID);
-                                        children.Add(childProc);
-                                        children.AddRange(GetChildProcesses(childProc));
+                                        children.Add(Process.GetProcessById(childId));
                                     }
                                     catch { }
                                 }
-                            } while (Process32Next(hSnapshot, ref procEntry));
-                        }
+                            }
+                        } while (addedAny);
                     }
                     finally
                     {
@@ -1083,7 +1100,6 @@ namespace MeGUI
                     {
                         Process oProc = Process.GetProcessById(Convert.ToInt32(mo["ProcessID"]));
                         children.Add(oProc);
-                        children.AddRange(GetChildProcesses(oProc));
                     }
                 }
                 catch { }
