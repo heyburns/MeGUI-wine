@@ -957,6 +957,25 @@ namespace MeGUI
         }
 
         /// <value>
+        [DllImport("ntdll.dll", EntryPoint = "wine_get_version", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr wine_get_version();
+
+        public static bool IsWine
+        {
+            get
+            {
+                try
+                {
+                    return wine_get_version() != IntPtr.Zero;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        /// <summary>
         /// Sets the process, memory and I/O priority on Windows Vista or newer operating systems
         /// </value>
         public static bool SetProcessPriority(Process oMainProcess, WorkerPriorityType processPriority, bool lowIOPriority, int iMinimumChildProcessCount)
@@ -970,7 +989,7 @@ namespace MeGUI
                 switch (processPriority)
                 {
                     case WorkerPriorityType.BELOW_NORMAL:
-                        priority = ProcessPriorityClass.BelowNormal;
+                        priority = IsWine ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
                         break;
                     case WorkerPriorityType.NORMAL:
                         priority = ProcessPriorityClass.Normal;
@@ -979,9 +998,12 @@ namespace MeGUI
                         priority = ProcessPriorityClass.AboveNormal;
                         break;
                     default:
-                        priority = ProcessPriorityClass.Idle;
+                        priority = IsWine ? ProcessPriorityClass.Normal : ProcessPriorityClass.Idle;
                         break;
                 }
+
+                if (IsWine)
+                    lowIOPriority = false;
 
                 // get the list of child processes
                 // make sure that the required child processes have been started already

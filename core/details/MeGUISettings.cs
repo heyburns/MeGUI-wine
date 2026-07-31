@@ -1539,7 +1539,7 @@ namespace MeGUI
             arrWorkerPriority.Add(new WorkerPriority(JobType.Indexer, WorkerPriorityType.BELOW_NORMAL, false));
             arrWorkerPriority.Add(new WorkerPriority(JobType.Muxer, WorkerPriorityType.BELOW_NORMAL, false));
             arrWorkerPriority.Add(new WorkerPriority(JobType.OneClick, WorkerPriorityType.BELOW_NORMAL, false));
-            arrWorkerPriority.Add(new WorkerPriority(JobType.Video, WorkerPriorityType.IDLE, true));
+            arrWorkerPriority.Add(new WorkerPriority(JobType.Video, WorkerPriorityType.NORMAL, false));
         }
 
         public int DPIRescale(int iOriginalValue)
