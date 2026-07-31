@@ -978,24 +978,29 @@ namespace MeGUI
                     if (oProc == null || oProc.HasExited)
                         continue;
 
-                    // set process priority
-                    oProc.PriorityClass = priority;
+                    try
+                    {
+                        // set process priority
+                        oProc.PriorityClass = priority;
+                    }
+                    catch { }
 
                     if (!OSInfo.IsWindowsVistaOrNewer)
                         continue;
 
-                    int prioIO = PRIORITY_IO_NORMAL;
-                    int prioMemory = PRIORITY_MEMORY_NORMAL;
-                    if (lowIOPriority)
+                    try
                     {
-                        prioIO = PRIORITY_IO_VERY_LOW;
-                        prioMemory = PRIORITY_MEMORY_VERY_LOW;
-                        SetPriorityClass(oProc.Handle, PROCESS_MODE_BACKGROUND_BEGIN);
+                        int prioIO = PRIORITY_IO_NORMAL;
+                        int prioMemory = PRIORITY_MEMORY_NORMAL;
+                        if (lowIOPriority)
+                        {
+                            prioIO = PRIORITY_IO_VERY_LOW;
+                            prioMemory = PRIORITY_MEMORY_VERY_LOW;
+                        }
+                        try { NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_IO_PRIORITY, ref prioIO, Marshal.SizeOf(prioIO)); } catch { }
+                        try { NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_MEMORY_PRIORITY, ref prioMemory, Marshal.SizeOf(prioMemory)); } catch { }
                     }
-                    else
-                        SetPriorityClass(oProc.Handle, PROCESS_MODE_BACKGROUND_END);
-                    NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_IO_PRIORITY, ref prioIO, Marshal.SizeOf(prioIO));
-                    NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_MEMORY_PRIORITY, ref prioMemory, Marshal.SizeOf(prioMemory));
+                    catch { }
                 }
             }
             catch

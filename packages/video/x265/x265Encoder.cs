@@ -50,6 +50,7 @@ namespace MeGUI
 
         public override void ProcessLine(string line, StreamType stream, ImageType oType)
         {
+            line = line.Trim();
             if (line.StartsWith("[")) // status update
             {
                 int frameNumberStart = line.IndexOf("]", 4) + 2;
