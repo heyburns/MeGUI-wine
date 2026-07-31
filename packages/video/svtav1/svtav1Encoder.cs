@@ -51,6 +51,7 @@ namespace MeGUI
 
         public override void ProcessLine(string line, StreamType stream, ImageType oType)
         {
+            line = line.Trim();
             if (line.StartsWith("Encoding")) // status update
             {
                 int frameNumberStart = line.IndexOf(":", 4) + 2;
@@ -219,7 +220,7 @@ namespace MeGUI
                     || xs.VideoEncodingType == VideoCodecSettings.VideoEncodingMode.threepass1)
                     sb.Append("");
                 else if (!String.IsNullOrEmpty(output))
-                    sb.Append("-b " + "\"" + output + "\""); 
+                    sb.Append("-b " + "\"" + output + "\" 2>&1"); 
             }
 
             return sb.ToString();

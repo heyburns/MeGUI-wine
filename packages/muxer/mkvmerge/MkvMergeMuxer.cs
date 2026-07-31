@@ -61,10 +61,15 @@ namespace MeGUI
         {
             try
             {
-                int percentageStart = 10;
+                line = line.Trim();
+                int percentageStart = line.IndexOf("Progress: ") + 10;
                 int percentageEnd = line.IndexOf("%");
-                string frameNumber = line.Substring(percentageStart, percentageEnd - percentageStart).Trim();
-                return Int32.Parse(frameNumber, new System.Globalization.CultureInfo("en-US"));
+                if (percentageStart >= 10 && percentageEnd > percentageStart)
+                {
+                    string frameNumber = line.Substring(percentageStart, percentageEnd - percentageStart).Trim();
+                    return Int32.Parse(frameNumber, System.Globalization.CultureInfo.InvariantCulture);
+                }
+                return null;
             }
 
             catch (Exception e)

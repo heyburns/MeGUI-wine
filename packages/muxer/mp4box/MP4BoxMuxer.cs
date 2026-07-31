@@ -71,6 +71,7 @@ namespace MeGUI
         /// <returns>the line type</returns>
         private static LineType getLineType(string line)
         {
+            line = line.Trim();
             if (line.StartsWith("Import"))
                 return LineType.importing;
             if (line.StartsWith("ISO File Writing"))

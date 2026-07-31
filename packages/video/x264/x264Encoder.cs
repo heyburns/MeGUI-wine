@@ -64,6 +64,7 @@ namespace MeGUI
 
         public override void ProcessLine(string line, StreamType stream, ImageType oType)
         {
+            line = line.Trim();
             if (line.StartsWith("[")) // status update
             {
                 int frameNumberStart = line.IndexOf("]", 4) + 2;
@@ -998,7 +999,7 @@ namespace MeGUI
                 if (!UseWrapper())
                     sb.Append("\"" + input + "\" ");
                 else
-                    sb.Append("--stdin y4m -\"");
+                    sb.Append("--stdin y4m - 2>&1\"");
             }
             #endregion
 

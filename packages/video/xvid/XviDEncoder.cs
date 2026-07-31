@@ -49,6 +49,7 @@ new JobProcessorFactory(new ProcessorFactory(init), "XviDEncoder");
 
         public override void ProcessLine(string line, StreamType stream, ImageType oType)
         {
+            line = line.Trim();
             if (bAVSKeyToBeRemoved)
                 RemoveAVSKeys();
 

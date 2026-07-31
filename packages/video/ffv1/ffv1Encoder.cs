@@ -49,6 +49,7 @@ namespace MeGUI
 
         public override void ProcessLine(string line, StreamType stream, ImageType oType)
         {
+            line = line.Trim();
             if (line.StartsWith("Pos:")) // status update
             {
                 int frameNumberStart = line.IndexOf("s", 4) + 1;
