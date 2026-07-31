@@ -227,7 +227,7 @@ namespace MeGUI
                     sb.Append("--output NUL ");
                 else if (!String.IsNullOrEmpty(output))
                     sb.Append("--output " + "\"" + output + "\" ");
-                sb.Append("--frames " + numberOfFrames + " --y4m --input -\""); //force --input switch since x265 v3.6+65 otherwise we get an error
+                sb.Append("--frames " + numberOfFrames + " --y4m --input - 2>&1\""); //force --input switch since x265 v3.6+65 otherwise we get an error
             }
 
             return sb.ToString();
