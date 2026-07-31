@@ -920,6 +920,33 @@ namespace MeGUI
         private const int THREAD_MODE_BACKGROUND_BEGIN = 0x00010000;
         private const int THREAD_MODE_BACKGROUND_END = 0x00020000;
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct PROCESSENTRY32
+        {
+            public uint dwSize;
+            public uint cntUsage;
+            public uint th32ProcessID;
+            public IntPtr th32DefaultHeapID;
+            public uint th32ModuleID;
+            public uint cntThreads;
+            public uint th32ParentProcessID;
+            public int pcPriClassBase;
+            public uint dwFlags;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            public string szExeFile;
+        }
+
+        private const uint TH32CS_SNAPPROCESS = 0x00000002;
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern IntPtr CreateToolhelp32Snapshot(uint dwFlags, uint th32ProcessID);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        private static extern bool Process32First(IntPtr hSnapshot, ref PROCESSENTRY32 lppe);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        private static extern bool Process32Next(IntPtr hSnapshot, ref PROCESSENTRY32 lppe);
+
         public static void KillProcess(Process oProc)
         {
             try
@@ -990,13 +1017,8 @@ namespace MeGUI
 
                     try
                     {
-                        int prioIO = PRIORITY_IO_NORMAL;
+                        int prioIO = lowIOPriority ? PRIORITY_IO_VERY_LOW : PRIORITY_IO_NORMAL;
                         int prioMemory = PRIORITY_MEMORY_NORMAL;
-                        if (lowIOPriority)
-                        {
-                            prioIO = PRIORITY_IO_VERY_LOW;
-                            prioMemory = PRIORITY_MEMORY_VERY_LOW;
-                        }
                         try { NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_IO_PRIORITY, ref prioIO, Marshal.SizeOf(prioIO)); } catch { }
                         try { NtSetInformationProcess(oProc.Handle, PROCESS_INFORMATION_MEMORY_PRIORITY, ref prioMemory, Marshal.SizeOf(prioMemory)); } catch { }
                     }
@@ -1010,17 +1032,61 @@ namespace MeGUI
             return true;
         }
 
-
         public static List<Process> GetChildProcesses(Process process)
         {
             List<Process> children = new List<Process>();
-            ManagementObjectSearcher mos = new ManagementObjectSearcher(String.Format("Select * From Win32_Process Where ParentProcessID={0}", process.Id));
+            if (process == null || process.HasExited)
+                return children;
 
-            foreach (ManagementObject mo in mos.Get())
+            try
             {
-                Process oProc = Process.GetProcessById(Convert.ToInt32(mo["ProcessID"]));
-                children.Add(oProc);
-                children.AddRange(GetChildProcesses(oProc));
+                uint parentId = (uint)process.Id;
+                IntPtr hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+                if (hSnapshot != IntPtr.Zero && hSnapshot != (IntPtr)(-1))
+                {
+                    try
+                    {
+                        PROCESSENTRY32 procEntry = new PROCESSENTRY32();
+                        procEntry.dwSize = (uint)Marshal.SizeOf(typeof(PROCESSENTRY32));
+                        if (Process32First(hSnapshot, ref procEntry))
+                        {
+                            do
+                            {
+                                if (procEntry.th32ParentProcessID == parentId && procEntry.th32ProcessID != parentId)
+                                {
+                                    try
+                                    {
+                                        Process childProc = Process.GetProcessById((int)procEntry.th32ProcessID);
+                                        children.Add(childProc);
+                                        children.AddRange(GetChildProcesses(childProc));
+                                    }
+                                    catch { }
+                                }
+                            } while (Process32Next(hSnapshot, ref procEntry));
+                        }
+                    }
+                    finally
+                    {
+                        CloseHandle(hSnapshot);
+                    }
+                }
+            }
+            catch { }
+
+            if (children.Count == 0)
+            {
+                try
+                {
+                    ManagementObjectSearcher mos = new ManagementObjectSearcher(String.Format("Select * From Win32_Process Where ParentProcessID={0}", process.Id));
+
+                    foreach (ManagementObject mo in mos.Get())
+                    {
+                        Process oProc = Process.GetProcessById(Convert.ToInt32(mo["ProcessID"]));
+                        children.Add(oProc);
+                        children.AddRange(GetChildProcesses(oProc));
+                    }
+                }
+                catch { }
             }
 
             return children;
