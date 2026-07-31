@@ -106,6 +106,7 @@ namespace MeGUI
 
         public MainForm(SplashScreen startForm)
         {
+            FileUtil.EnsureCoreLibraries();
             // Log File Handling
             string strMeGUILogPath = Path.GetDirectoryName(Application.ExecutablePath) + @"\logs";
             FileUtil.ensureDirectoryExists(strMeGUILogPath);
@@ -1041,16 +1042,17 @@ namespace MeGUI
             
             // prevent another instance of MeGUI from the same location
             int iCount = 0;
+            int currentPid = Process.GetCurrentProcess().Id;
             foreach (Process oProc in Process.GetProcessesByName("MeGUI"))
             {
                 try
                 {
-                    if (Application.ExecutablePath.Equals(oProc.MainModule.FileName))
+                    if (oProc.Id != currentPid && Application.ExecutablePath.Equals(oProc.MainModule.FileName))
                         iCount++;
                 }
                 catch { }
             }
-            if (iCount > 1)
+            if (iCount > 0)
             {
                 startForm.Close();
                 MessageBox.Show("There is already another instance of the application running.", "MeGUI Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

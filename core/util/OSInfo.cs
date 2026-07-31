@@ -92,9 +92,11 @@ namespace MeGUI
             }
             else
             {
-                if (osVersionInfo.szCSDVersion != "")
+                if (!string.IsNullOrEmpty(osVersionInfo.szCSDVersion))
                 {
-                    return " SP" + osVersionInfo.szCSDVersion.Substring(13, 1);
+                    if (osVersionInfo.szCSDVersion.Length >= 14 && osVersionInfo.szCSDVersion.StartsWith("Service Pack ", StringComparison.OrdinalIgnoreCase))
+                        return " SP" + osVersionInfo.szCSDVersion.Substring(13);
+                    return " " + osVersionInfo.szCSDVersion;
                 }
                 else
                 {
@@ -599,10 +601,9 @@ namespace MeGUI
                     if (value >= 378389)
                         return fv = "4.5.0";
 
-                    throw new NotSupportedException($"No 4.5 or later framework version detected, framework key value: {value}");
+                    if (value > 0)
+                        return fv = "4.x (" + value + ")";
                 }
-
-                throw new NotSupportedException(@"No registry key found under 'SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full' to determine running framework version");
             }
 
 

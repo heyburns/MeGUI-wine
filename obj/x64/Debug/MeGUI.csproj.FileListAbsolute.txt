@@ -190,3 +190,4 @@ Z:\home\alan\.gemini\antigravity\scratch\megui_repo\bin\x64\Debug\MeGUI.exe
 Z:\home\alan\.gemini\antigravity\scratch\megui_repo\bin\x64\Debug\MeGUI.pdb
 Z:\home\alan\.gemini\antigravity\scratch\megui_repo\bin\x64\Debug\ICSharpCode.SharpZipLib.dll
 Z:\home\alan\.gemini\antigravity\scratch\megui_repo\bin\x64\Debug\SevenZipSharp.dll
+Z:\home\alan\.gemini\antigravity\scratch\megui_repo\bin\x64\Debug\lib_x64\AvisynthWrapper.dll

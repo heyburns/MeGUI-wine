@@ -1,4 +1,4 @@
-﻿// ****************************************************************************
+// ****************************************************************************
 // 
 // Copyright (C) 2005-2026 Doom9 & al
 // 
@@ -570,6 +570,9 @@ namespace MeGUI
             // Now update the files we can
             foreach (UpdateWindow.iUpgradeable file in UpdateData)
             {
+                if (file.Name != null && file.Name.Equals("megui", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 if ((!String.IsNullOrEmpty(_forcePackage) || !file.DownloadChecked) && !file.Name.Equals(_forcePackage))
                     continue;
 

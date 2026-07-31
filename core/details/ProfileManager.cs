@@ -176,7 +176,7 @@ namespace MeGUI
 
         /// <summary>
         /// saves all the profiles
-        /// this is called when the program exists and ensures that all
+        /// this is called when the program exits and ensures that all
         /// currently defined profiles are saved, overwriting currently existing ones
         /// </summary>
         public static bool WriteProfiles(string savePath, IEnumerable<Profile> profiles)
@@ -184,66 +184,20 @@ namespace MeGUI
             if (string.IsNullOrEmpty(savePath))
                 savePath = GetDefaultProfilPath();
 
-            // remove old backup files if available
-            if (!deleteFiles(savePath, "*.backup"))
+            if (profiles == null)
                 return false;
-
-            // backup profiles
-            try
-            {
-                DirectoryInfo fi = new DirectoryInfo(savePath);
-                FileInfo[] files = fi.GetFiles("*.xml", SearchOption.AllDirectories);
-                foreach (FileInfo f in files)
-                {
-                    f.CopyTo(Path.Combine(f.Directory.FullName, Path.ChangeExtension(f.Name, ".backup")));
-                }
-            }
-            catch (Exception ex)
-            {
-                LogItem _oLog = MainForm.Instance.Log.Info("Error");
-                _oLog.LogValue("Backup profile files could not be created", ex, ImageType.Error);
-
-                // remove backup files
-                deleteFiles(savePath, "*.backup");
-                return false;
-            }
-
-            // remove profile files
-            if (!deleteFiles(savePath, "*.xml"))
-            {
-                // restore backup
-                try
-                {
-                    DirectoryInfo fi = new DirectoryInfo(savePath);
-                    FileInfo[] files = fi.GetFiles("*.backup", SearchOption.AllDirectories);
-                    foreach (FileInfo f in files)
-                    {
-                        f.CopyTo(Path.Combine(f.Directory.FullName, Path.ChangeExtension(f.Name, ".xml")));
-                    }
-                }
-                catch (Exception e)
-                {
-                    LogItem _oLog = MainForm.Instance.Log.Info("Error");
-                    _oLog.LogValue("Profile files could not be restored", e, ImageType.Error);
-                }
-                return false;
-            }
 
             bool bSuccess = true;
             try
             {
                 foreach (Profile p in profiles)
                 {
+                    if (p == null) continue;
                     if (!Util.XmlSerialize(p, profilePath(savePath, p)))
                     {
-                        string backupFile = Path.ChangeExtension(profilePath(savePath, p), ".backup");
-                        if (File.Exists(backupFile))
-                            File.Copy(backupFile, profilePath(savePath, p), true);
                         bSuccess = false;
                     }
                 }
-
-                deleteFiles(savePath, "*.backup");
             }
             catch (Exception ex)
             {

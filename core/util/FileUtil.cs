@@ -1078,6 +1078,30 @@ namespace MeGUI.core.util
         }
 
         /// <summary>
+        /// ensures essential native DLLs exist in the application folder
+        /// </summary>
+        public static void EnsureCoreLibraries()
+        {
+            try
+            {
+                string appDir = Path.GetDirectoryName(Application.ExecutablePath);
+                string libDir = Path.Combine(appDir, Environment.Is64BitProcess ? "lib_x64" : "lib_x86");
+                if (!Directory.Exists(libDir)) return;
+                string[] requiredDlls = new string[] { "MediaInfo.dll", "AvisynthWrapper.dll", "7z.dll" };
+                foreach (string dll in requiredDlls)
+                {
+                    string targetPath = Path.Combine(appDir, dll);
+                    string sourcePath = Path.Combine(libDir, dll);
+                    if (!File.Exists(targetPath) && File.Exists(sourcePath))
+                    {
+                        try { File.Copy(sourcePath, targetPath, true); } catch { }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        /// <summary>
         /// removes runtime/redist files
         /// </summary>
         public static void RemoveRuntimeFiles()
@@ -1111,7 +1135,13 @@ namespace MeGUI.core.util
                     continue;
 
                 foreach (String file in sourceFiles)
+                {
+                    if (file.Equals("MediaInfo.dll", StringComparison.OrdinalIgnoreCase) ||
+                        file.Equals("AvisynthWrapper.dll", StringComparison.OrdinalIgnoreCase) ||
+                        file.Equals("7z.dll", StringComparison.OrdinalIgnoreCase))
+                        continue;
                     DeleteFile(Path.Combine(dir, file), null);
+                }
             }
         }
         #endregion

@@ -114,6 +114,9 @@ namespace MeGUI
             {
                 get
                 {
+                    if (this.name != null && this.name.Equals("megui", StringComparison.OrdinalIgnoreCase))
+                        return false;
+
                     Version latest = this.availableVersion;
                     if (this.name == "neroaacenc")
                     {
