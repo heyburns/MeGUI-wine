@@ -15,7 +15,7 @@
 Robocrop()
 Lanczos4Resize(1440,1080)
 RemoveDirtSMC(25)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

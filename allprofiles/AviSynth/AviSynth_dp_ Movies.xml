@@ -14,7 +14,7 @@
 &lt;denoise&gt;
 #LRemoveDust(17,4)
 RemoveDirtSMC(50)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

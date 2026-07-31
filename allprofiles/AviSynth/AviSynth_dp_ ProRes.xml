@@ -16,7 +16,7 @@ ConvertBits(8)
 ConverttoYV12()
 Addgrain()
 ConvertBits(10)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

@@ -14,7 +14,7 @@
 &lt;denoise&gt;
 tdeint(order=-1).Tdecimate()
 RemoveDirtSMC(25)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

@@ -17,7 +17,7 @@ LanczosResize(960,720)
 TemporalDegrain2_fast()
 RemoveDirtSMC(25)
 ConvertBits(10)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

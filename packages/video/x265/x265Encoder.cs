@@ -93,6 +93,19 @@ namespace MeGUI
                     sb.Append("\"" + Path.Combine(Path.GetDirectoryName(MainForm.Instance.Settings.X265.Path), @"x64\x265.exe") + "\" ");
             }
 
+            if (OSInfo.IsWine)
+            {
+                if (!xs.CustomEncoderOptions.Contains("--pools"))
+                {
+                    int poolThreads = Math.Min(Environment.ProcessorCount, 16);
+                    sb.Append("--pools " + poolThreads + " ");
+                }
+                if (!xs.CustomEncoderOptions.Contains("--frame-threads"))
+                {
+                    sb.Append("--frame-threads 4 ");
+                }
+            }
+
             #region main tab
             ///<summary>
             /// x265 Main Tab Settings

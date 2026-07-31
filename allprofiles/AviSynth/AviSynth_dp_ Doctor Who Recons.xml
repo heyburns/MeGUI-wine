@@ -18,7 +18,7 @@ orig_height = Height
 Robocrop()
 LanczosResize(orig_width, orig_height)
 ConvertBits(10)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

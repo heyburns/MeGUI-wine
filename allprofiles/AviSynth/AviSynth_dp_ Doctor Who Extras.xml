@@ -16,7 +16,7 @@ ConvertBits(8)
 ConverttoYV12(interlaced=true)
 NNEDI3(field=-2)
 ConvertBits(10)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

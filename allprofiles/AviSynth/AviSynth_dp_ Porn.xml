@@ -15,7 +15,7 @@
 ConvertBits(8)
 ConverttoYV12()
 LRemoveDust(17,4)
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

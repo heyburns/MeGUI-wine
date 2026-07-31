@@ -19,7 +19,7 @@ TemporalDegrain2_fast()
 nnedi3_rpow2(rfactor=4, nsize = 4, nns = 4)
 Lanczos4Resize(1440,1080)
 Addgrain()
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

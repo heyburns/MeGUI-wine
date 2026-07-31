@@ -13,7 +13,7 @@
 &lt;resize&gt;
 &lt;denoise&gt;
 #SelectEven()
-Prefetch(12)
+Prefetch(4)
 </Template>
     <ResizeMethod>Lanczos</ResizeMethod>
     <DenoiseMethod>MinimalNoise</DenoiseMethod>

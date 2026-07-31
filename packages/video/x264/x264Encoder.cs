@@ -110,6 +110,15 @@ namespace MeGUI
                 }
             }
 
+            if (OSInfo.IsWine)
+            {
+                if (!xs.CustomEncoderOptions.Contains("--threads"))
+                {
+                    int threadCount = Math.Min(Environment.ProcessorCount, 16);
+                    sb.Append("--threads " + threadCount + " ");
+                }
+            }
+
             oSettingsHandler.getFPS(ref fps_n, ref fps_d);
 
             #region main tab
