@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 using MeGUI.core.util;
@@ -347,16 +348,35 @@ namespace MeGUI
         #region reading process output
         protected virtual void readStream(StreamReader sr, ManualResetEvent rEvent, StreamType str)
         {
-            // Use a using statement to ensure the StreamReader is disposed after use
             using (sr)
             {
-                string line;
                 if (Proc != null && sr != null && rEvent != null)
                 {
                     try
                     {
-                        while ((line = sr.ReadLine()) != null)
+                        StringBuilder sb = new StringBuilder();
+                        int c;
+                        while ((c = sr.Read()) != -1)
                         {
+                            char ch = (char)c;
+                            if (ch == '\r' || ch == '\n')
+                            {
+                                if (sb.Length > 0)
+                                {
+                                    string line = sb.ToString();
+                                    sb.Clear();
+                                    mre.WaitOne();
+                                    ProcessLine(line, str, ImageType.Information);
+                                }
+                            }
+                            else
+                            {
+                                sb.Append(ch);
+                            }
+                        }
+                        if (sb.Length > 0)
+                        {
+                            string line = sb.ToString();
                             mre.WaitOne();
                             ProcessLine(line, str, ImageType.Information);
                         }

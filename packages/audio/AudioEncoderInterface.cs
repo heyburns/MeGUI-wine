@@ -382,13 +382,33 @@ namespace MeGUI
         {
             using (sr)
             {
-                string line;
                 if (_encoderProcess != null && sr != null)
                 {
                     try
                     {
-                        while ((line = sr.ReadLine()) != null)
+                        StringBuilder sb = new StringBuilder();
+                        int c;
+                        while ((c = sr.Read()) != -1)
                         {
+                            char ch = (char)c;
+                            if (ch == '\r' || ch == '\n')
+                            {
+                                if (sb.Length > 0)
+                                {
+                                    string line = sb.ToString();
+                                    sb.Clear();
+                                    _mre.WaitOne();
+                                    ProcessLine(line, str, ImageType.Information);
+                                }
+                            }
+                            else
+                            {
+                                sb.Append(ch);
+                            }
+                        }
+                        if (sb.Length > 0)
+                        {
+                            string line = sb.ToString();
                             _mre.WaitOne();
                             ProcessLine(line, str, ImageType.Information);
                         }
